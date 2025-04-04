@@ -1,4 +1,4 @@
-app-title = Tbgui3
+app-title = tbgui
 about = About
 view = View
 welcome = Welcome to COSMIC! ✨

@@ -1,5 +1,5 @@
 [package]
-name = "tbgui3"
+name = "tbgui"
 version = "0.1.0"
 edition = "2021"
 license = "MPL-2.0"

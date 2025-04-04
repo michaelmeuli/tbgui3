@@ -1,4 +1,4 @@
-name := 'tbgui3'
+name := 'tbgui'
 appid := 'ch.uzh.michael.tbgui'
 
 rootdir := ''

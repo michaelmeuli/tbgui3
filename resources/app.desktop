@@ -1,9 +1,9 @@
 [Desktop Entry]
-Name=Tbgui3
+Name=tbgui
 Comment=TB-Profiler frontend
 Type=Application
 Icon=ch.uzh.michael.tbgui
-Exec=tbgui3 %F
+Exec=tbgui %F
 Terminal=false
 StartupNotify=true
 Categories=COSMIC

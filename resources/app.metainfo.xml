@@ -3,7 +3,7 @@
   <id>ch.uzh.michael.tbgui</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>MPL-2.0</project_license>
-  <name>Tbgui3</name>
+  <name>tbgui</name>
   <summary>TB-Profiler frontend</summary>
   <icon type="remote" width="64" height="64" scale="1">
     https://github.com/michaelmeuli/tbgui.git/raw/main/resources/icons/hicolor/scalable/apps/icon.svg
@@ -13,7 +13,7 @@
   <provides>
     <id>ch.uzh.michael.tbgui</id>
     <binaries>
-      <binary>tbgui3</binary>
+      <binary>tbgui</binary>
     </binaries>
   </provides>
   <requires>
