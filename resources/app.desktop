@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Tbgui3
+Comment=TB-Profiler frontend
+Type=Application
+Icon=ch.uzh.michael.tbgui
+Exec=tbgui3 %F
+Terminal=false
+StartupNotify=true
+Categories=COSMIC
+Keywords=COSMIC
+MimeType=
