@@ -11,6 +11,7 @@ use cosmic::widget::{self, icon, menu, nav_bar};
 use cosmic::{cosmic_theme, theme};
 use futures_util::SinkExt;
 use std::collections::HashMap;
+use serde::{Deserialize, Serialize};
 
 const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
 const APP_ICON: &[u8] = include_bytes!("../resources/icons/hicolor/scalable/apps/icon.svg");
@@ -20,23 +21,45 @@ pub mod icon_cache;
 use crate::app::icon_cache::icon_cache_get;
 
 
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+pub enum NavPage {
+    RunTbProfilerView,
+    DownloadResultsView,
+    DeleteResultsView,
+}
 
-/// The application model stores app-specific state used to describe its interface and
-/// drive its logic.
-pub struct AppModel {
-    /// Application state which is managed by the COSMIC runtime.
+impl NavPage {
+    fn all() -> &'static [Self] {
+        &[Self::RunTbProfilerView, Self::DownloadResultsView, Self::DeleteResultsView]
+    }
+
+    fn title(&self) -> String {
+        match self {
+            Self::RunTbProfilerView => fl!("run-tb-profiler"),
+            Self::DownloadResultsView => fl!("download-results"),
+            Self::DeleteResultsView => fl!("delete-results"),
+        }
+    }
+
+    fn icon(&self) -> widget::icon::Icon {
+        match self {
+            Self::RunTbProfilerView => icon_cache_get("play", 16),
+            Self::DownloadResultsView => icon_cache_get("download", 16),
+            Self::DeleteResultsView => icon_cache_get("delete", 16),
+        }
+    }
+}
+
+
+pub struct App {
     core: cosmic::Core,
-    /// Display a context drawer with the designated page if defined.
     context_page: ContextPage,
-    /// Contains items assigned to the nav bar panel.
-    nav: nav_bar::Model,
-    /// Key bindings for the application's menu bar.
+    nav_model: nav_bar::Model,
     key_binds: HashMap<menu::KeyBind, MenuAction>,
-    // Configuration data that persists between application runs.
     config: Config,
 }
 
-/// Messages emitted by the application and its widgets.
+
 #[derive(Debug, Clone)]
 pub enum Message {
     OpenRepositoryUrl,
@@ -47,7 +70,7 @@ pub enum Message {
 }
 
 /// Create a COSMIC application from the app model
-impl cosmic::Application for AppModel {
+impl cosmic::Application for App {
     /// The async executor that will be used to run your application's commands.
     type Executor = cosmic::executor::Default;
 
@@ -68,35 +91,29 @@ impl cosmic::Application for AppModel {
         &mut self.core
     }
 
-    /// Initializes the application with any given flags and startup commands.
+
     fn init(
         core: cosmic::Core,
         _flags: Self::Flags,
     ) -> (Self, Task<cosmic::Action<Self::Message>>) {
-        // Create a nav bar with three page items.
-        let mut nav = nav_bar::Model::default();
-
-        nav.insert()
-            .text(fl!("page-id", num = 1))
-            .data::<Page>(Page::Page1)
-            .icon(icon::from_name("applications-science-symbolic"))
-            .activate();
-
-        nav.insert()
-            .text(fl!("page-id", num = 2))
-            .data::<Page>(Page::Page2)
-            .icon(icon::from_name("applications-system-symbolic"));
-
-        nav.insert()
-            .text(fl!("page-id", num = 3))
-            .data::<Page>(Page::Page3)
-            .icon(icon::from_name("applications-games-symbolic"));
+        let mut nav_model = nav_bar::Model::default();
+        for &nav_page in NavPage::all() {
+            let id = nav_model
+                .insert()
+                .icon(nav_page.icon())
+                .text(nav_page.title())
+                .data::<NavPage>(nav_page)
+                .id();
+            // if nav_page == flags.config.default_page {
+            //     nav_model.activate(id);
+            // }
+        }
 
         // Construct the app model with the runtime's core.
-        let mut app = AppModel {
+        let mut app = App {
             core,
             context_page: ContextPage::default(),
-            nav,
+            nav_model,
             key_binds: HashMap::new(),
             // Optional configuration file for an application.
             config: cosmic_config::Config::new(Self::APP_ID, Config::VERSION)
@@ -134,7 +151,7 @@ impl cosmic::Application for AppModel {
 
     /// Enables the COSMIC application to create a nav bar with this model.
     fn nav_model(&self) -> Option<&nav_bar::Model> {
-        Some(&self.nav)
+        Some(&self.nav_model)
     }
 
     /// Display a context drawer if the context page is requested.
@@ -239,13 +256,13 @@ impl cosmic::Application for AppModel {
     /// Called when a nav item is selected.
     fn on_nav_select(&mut self, id: nav_bar::Id) -> Task<cosmic::Action<Self::Message>> {
         // Activate the page in the model.
-        self.nav.activate(id);
+        self.nav_model.activate(id);
 
         self.update_title()
     }
 }
 
-impl AppModel {
+impl App {
     /// The about page for this app.
     pub fn about(&self) -> Element<Message> {
         let cosmic_theme::Spacing { space_xxs, .. } = theme::active().cosmic().spacing;
@@ -284,7 +301,7 @@ impl AppModel {
     pub fn update_title(&mut self) -> Task<cosmic::Action<Message>> {
         let mut window_title = fl!("app-title");
 
-        if let Some(page) = self.nav.text(self.nav.active()) {
+        if let Some(page) = self.nav_model.text(self.nav_model.active()) {
             window_title.push_str(" — ");
             window_title.push_str(page);
         }

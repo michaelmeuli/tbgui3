@@ -5,7 +5,6 @@ use std::{
     sync::{Mutex, OnceLock},
 };
 
-pub static WEATHER_ICONS: Dir = include_dir!("res/icons/bundled/weather");
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct IconCacheKey {
@@ -34,9 +33,15 @@ impl IconCache {
             };
         }
 
-        bundle!("view-daily", 16);
-        bundle!("view-detail", 16);
-        bundle!("view-hourly", 16);
+        bundle!("calendar", 16);
+        bundle!("clock", 16);
+        bundle!("delete", 16);
+        bundle!("detail", 16);
+        bundle!("download", 16);
+        bundle!("meds", 16);
+        bundle!("play", 16);
+        bundle!("reload", 16);
+        bundle!("scanner", 16);
 
         Self { cache }
     }
