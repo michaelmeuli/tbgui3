@@ -17,6 +17,8 @@ const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
 const APP_ICON: &[u8] = include_bytes!("../resources/icons/hicolor/scalable/apps/icon.svg");
 
 pub mod icon_cache;
+pub mod settings;
+pub mod localize;
 
 use crate::app::icon_cache::icon_cache_get;
 
