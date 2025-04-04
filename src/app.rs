@@ -255,9 +255,7 @@ impl cosmic::Application for App {
 
     /// Called when a nav item is selected.
     fn on_nav_select(&mut self, id: nav_bar::Id) -> Task<cosmic::Action<Self::Message>> {
-        // Activate the page in the model.
         self.nav_model.activate(id);
-
         self.update_title()
     }
 }
