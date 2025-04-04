@@ -1,5 +1,4 @@
 use cosmic::widget::icon;
-use include_dir::{include_dir, Dir};
 use std::{
     collections::HashMap,
     sync::{Mutex, OnceLock},
