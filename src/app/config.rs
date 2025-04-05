@@ -4,8 +4,6 @@ use cosmic::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::model::weather::WeatherData;
-
 use super::{App, NavPage};
 
 pub const CONFIG_VERSION: u64 = 1;
@@ -34,113 +32,6 @@ pub const USER_TEMPLATE_REMOTE: &str = default_env(
     option_env!("USER_TEMPLATE_REMOTE"),
     "/shares/sander.imm.uzh/MM/PRJEB57919/template/user_template.docx",
 );
-
-
-
-
-
-
-
-
-
-
-
-#[derive(Clone, CosmicConfigEntry, Debug, Deserialize, Serialize, Default)]
-pub struct WeatherConfigState {
-    /// `Expires` response header of met.no request.
-    ///
-    /// No new request should be sent before this date.
-    /// The weather data does not change during this period.
-    #[serde(default)]
-    pub expires: Option<chrono::DateTime<chrono::FixedOffset>>,
-    /// Date of the last request.
-    ///
-    /// Used together with the `If-Modified-Since` request header.
-    /// If the weather data has not changed, the response status is `304 Not Modified`.
-    #[serde(default)]
-    pub last_request: Option<chrono::DateTime<chrono::FixedOffset>>,
-
-    pub weather_data: Option<WeatherData>,
-}
-
-impl WeatherConfigState {
-    pub fn config_handler() -> Option<Config> {
-        Config::new_state(App::APP_ID, CONFIG_VERSION).ok()
-    }
-
-    pub fn config() -> Self {
-        match Self::config_handler() {
-            Some(config_handler) => {
-                Self::get_entry(&config_handler).unwrap_or_else(|(errs, config)| {
-                    log::info!("errors loading config state: {:?}", errs);
-
-                    config
-                })
-            }
-            None => Self::default(),
-        }
-    }
-}
-
-#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Eq, Serialize)]
-pub enum SpeedUnits {
-    MetersPerSecond,
-    MilesPerHour,
-    KilometresPerHour,
-}
-
-#[derive(Clone, CosmicConfigEntry, Debug, Deserialize, Eq, PartialEq, Serialize)]
-pub struct WeatherConfig {
-    pub location: Option<String>,
-    pub latitude: Option<String>,
-    pub longitude: Option<String>,
-    pub units: Units,
-    pub timefmt: TimeFmt,
-    pub pressure_units: PressureUnits,
-    pub speed_units: SpeedUnits,
-    pub app_theme: AppTheme,
-    pub api_key: String,
-    pub default_page: NavPage,
-}
-
-impl Default for WeatherConfig {
-    fn default() -> Self {
-        Self {
-            location: None,
-            latitude: None,
-            longitude: None,
-            units: Units::Fahrenheit,
-            timefmt: TimeFmt::TwelveHr,
-            pressure_units: PressureUnits::Hectopascal,
-            speed_units: SpeedUnits::MetersPerSecond,
-            app_theme: AppTheme::System,
-            api_key: String::default(),
-            default_page: NavPage::HourlyView,
-        }
-    }
-}
-
-impl WeatherConfig {
-    pub fn config_handler() -> Option<Config> {
-        Config::new(App::APP_ID, CONFIG_VERSION).ok()
-    }
-
-    pub fn config() -> WeatherConfig {
-        match Self::config_handler() {
-            Some(config_handler) => {
-                WeatherConfig::get_entry(&config_handler).unwrap_or_else(|(errs, config)| {
-                    log::info!("errors loading config: {:?}", errs);
-
-                    config
-                })
-            }
-            None => WeatherConfig::default(),
-        }
-    }
-}
-
-
-
 
 
 
@@ -174,14 +65,24 @@ const fn default_env(v: Option<&'static str>, default: &'static str) -> &'static
     }
 }
 
+impl TbguiConfig {
+    pub fn config_handler() -> Option<Config> {
+        Config::new(App::APP_ID, CONFIG_VERSION).ok()
+    }
 
+    pub fn config() -> TbguiConfig {
+        match Self::config_handler() {
+            Some(config_handler) => {
+                TbguiConfig::get_entry(&config_handler).unwrap_or_else(|(errs, config)| {
+                    log::info!("errors loading config: {:?}", errs);
 
-
-
-
-
-
-
+                    config
+                })
+            }
+            None => TbguiConfig::default(),
+        }
+    }
+}
 
 
 

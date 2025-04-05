@@ -7,8 +7,6 @@ use cosmic::{
 use std::collections::HashMap;
 use cosmic::widget::{self, menu, nav_bar};
 
-use cosmic::widget::menu::action::MenuAction;
-
 use crate::app::{Action, Message};
 use crate::fl;
 
@@ -17,9 +15,9 @@ pub fn menu_bar<'a>(key_binds: &HashMap<KeyBind, Action>) -> Element<'a, Message
         menu::root(fl!("view")),
         menu::items(
             key_binds,
-            vec![menu::Item::Button(fl!("about"), None, MenuAction::About)],
+            vec![menu::Item::Button(fl!("about"), None, Action::About)],
         ),
     )]);
 
-    vec![menu_bar.into()]
+    menu_bar.into()
 }

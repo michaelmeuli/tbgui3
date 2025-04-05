@@ -4665,6 +4665,7 @@ dependencies = [
  "i18n-embed",
  "i18n-embed-fl",
  "libcosmic",
+ "log",
  "open",
  "rust-embed",
  "serde",
