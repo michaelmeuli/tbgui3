@@ -10,3 +10,4 @@ git-description = Git commit {$hash} on {$date}
 run-tb-profiler = Run TB-Profiler
 download-results = Download Results
 delete-results = Delete Results
+settings = Settings

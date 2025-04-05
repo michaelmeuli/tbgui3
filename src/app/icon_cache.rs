@@ -41,6 +41,7 @@ impl IconCache {
         bundle!("play", 16);
         bundle!("reload", 16);
         bundle!("scanner", 16);
+        bundle!("settings", 16);
 
         Self { cache }
     }

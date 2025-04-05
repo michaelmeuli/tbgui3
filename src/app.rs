@@ -28,11 +28,12 @@ pub enum NavPage {
     RunTbProfilerView,
     DownloadResultsView,
     DeleteResultsView,
+    SettingsView
 }
 
 impl NavPage {
     fn all() -> &'static [Self] {
-        &[Self::RunTbProfilerView, Self::DownloadResultsView, Self::DeleteResultsView]
+        &[Self::RunTbProfilerView, Self::DownloadResultsView, Self::DeleteResultsView, Self::SettingsView]
     }
 
     fn title(&self) -> String {
@@ -40,6 +41,7 @@ impl NavPage {
             Self::RunTbProfilerView => fl!("run-tb-profiler"),
             Self::DownloadResultsView => fl!("download-results"),
             Self::DeleteResultsView => fl!("delete-results"),
+            Self::SettingsView => fl!("settings"),
         }
     }
 
@@ -48,6 +50,7 @@ impl NavPage {
             Self::RunTbProfilerView => icon_cache_get("play", 16),
             Self::DownloadResultsView => icon_cache_get("download", 16),
             Self::DeleteResultsView => icon_cache_get("delete", 16),
+            Self::SettingsView => icon_cache_get("settings", 16),
         }
     }
 }
