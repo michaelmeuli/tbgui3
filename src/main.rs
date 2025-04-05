@@ -4,7 +4,8 @@ use app::{
 };
 
 mod app;
-mod config;
+mod model;
+
 
 
 fn main() -> cosmic::iced::Result {

@@ -1,24 +1,26 @@
-// SPDX-License-Identifier: MPL-2.0
-
-use crate::config::Config;
+use config::TbguiConfig;
 use crate::fl;
 use cosmic::app::context_drawer;
+use cosmic::app::Core;
 use cosmic::cosmic_config::{self, CosmicConfigEntry};
 use cosmic::iced::alignment::{Horizontal, Vertical};
 use cosmic::iced::{Alignment, Length, Subscription};
 use cosmic::prelude::*;
-use cosmic::widget::{self, menu, nav_bar};
+use cosmic::widget::{self, nav_bar};
 use cosmic::{cosmic_theme, theme};
 use futures_util::SinkExt;
 use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
+use cosmic::widget::menu::key_bind::KeyBind;
 
 const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
 const APP_ICON: &[u8] = include_bytes!("../resources/icons/hicolor/scalable/apps/icon.svg");
 
+pub mod config;
 pub mod icon_cache;
 pub mod settings;
 pub mod localize;
+pub mod menu;
 
 use crate::app::icon_cache::icon_cache_get;
 
@@ -57,11 +59,11 @@ impl NavPage {
 
 
 pub struct App {
-    core: cosmic::Core,
+    core: Core,
     context_page: ContextPage,
     nav_model: nav_bar::Model,
-    key_binds: HashMap<menu::KeyBind, MenuAction>,
-    config: Config,
+    key_binds: HashMap<KeyBind, MenuAction>,
+    config: TbguiConfig,
 }
 
 
@@ -70,7 +72,7 @@ pub enum Message {
     OpenRepositoryUrl,
     SubscriptionChannel,
     ToggleContextPage(ContextPage),
-    UpdateConfig(Config),
+    UpdateConfig(TbguiConfig),
     LaunchUrl(String),
 }
 
@@ -121,8 +123,8 @@ impl cosmic::Application for App {
             nav_model,
             key_binds: HashMap::new(),
             // Optional configuration file for an application.
-            config: cosmic_config::Config::new(Self::APP_ID, Config::VERSION)
-                .map(|context| match Config::get_entry(&context) {
+            config: cosmic_config::Config::new(Self::APP_ID, TbguiConfig::VERSION)
+                .map(|context| match TbguiConfig::get_entry(&context) {
                     Ok(config) => config,
                     Err((_errors, config)) => {
                         // for why in errors {
@@ -141,20 +143,10 @@ impl cosmic::Application for App {
         (app, command)
     }
 
-    /// Elements to pack at the start of the header bar.
     fn header_start(&self) -> Vec<Element<Self::Message>> {
-        let menu_bar = menu::bar(vec![menu::Tree::with_children(
-            menu::root(fl!("view")),
-            menu::items(
-                &self.key_binds,
-                vec![menu::Item::Button(fl!("about"), None, MenuAction::About)],
-            ),
-        )]);
-
-        vec![menu_bar.into()]
+        vec![menu::menu_bar(&self.key_binds)]
     }
 
-    /// Enables the COSMIC application to create a nav bar with this model.
     fn nav_model(&self) -> Option<&nav_bar::Model> {
         Some(&self.nav_model)
     }
@@ -208,7 +200,7 @@ impl cosmic::Application for App {
             ),
             // Watch for application configuration changes.
             self.core()
-                .watch_config::<Config>(Self::APP_ID)
+                .watch_config::<TbguiConfig>(Self::APP_ID)
                 .map(|update| {
                     // for why in update.errors {
                     //     tracing::error!(?why, "app config error");
