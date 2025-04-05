@@ -12,6 +12,7 @@ use futures_util::SinkExt;
 use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use cosmic::widget::menu::key_bind::KeyBind;
+use cosmic::widget::menu::action::MenuAction;
 
 const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
 const APP_ICON: &[u8] = include_bytes!("../resources/icons/hicolor/scalable/apps/icon.svg");
@@ -62,7 +63,7 @@ pub struct App {
     core: Core,
     context_page: ContextPage,
     nav_model: nav_bar::Model,
-    key_binds: HashMap<KeyBind, MenuAction>,
+    key_binds: HashMap<KeyBind, Action>,
     config: TbguiConfig,
 }
 
@@ -319,16 +320,16 @@ pub enum ContextPage {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum MenuAction {
+pub enum Action {
     About,
 }
 
-impl menu::action::MenuAction for MenuAction {
+impl MenuAction for Action {
     type Message = Message;
 
     fn message(&self) -> Self::Message {
         match self {
-            MenuAction::About => Message::ToggleContextPage(ContextPage::About),
+            Action::About => Message::ToggleContextPage(ContextPage::About),
         }
     }
 }
