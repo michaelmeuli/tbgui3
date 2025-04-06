@@ -1,7 +1,6 @@
 use cosmic::widget;
 use cosmic::Element;
 use crate::app::{App, Message};
-use crate::fl;
 
 use cosmic::iced::Length;
 use cosmic::iced::alignment::{Horizontal, Vertical};
@@ -14,7 +13,7 @@ where
     Self: cosmic::Application,
 {
     pub fn view_raw_sequences(&self) -> Element<Message> {
-        widget::text::title1(fl!("welcome"))
+        widget::text::title1("Raw Sequences")
             .apply(widget::container)
             .width(Length::Fill)
             .height(Length::Fill)
