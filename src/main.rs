@@ -1,5 +1,5 @@
 use app::{
-    settings::settings,
+    settings::{flags, settings},
     App,
 };
 
@@ -10,5 +10,5 @@ mod views;
 
 
 fn main() -> cosmic::iced::Result {
-    cosmic::app::run::<App>(settings(), ())
+    cosmic::app::run::<App>(settings(), flags())
 }

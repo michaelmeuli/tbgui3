@@ -43,6 +43,7 @@ pub struct TbguiConfig {
     pub remote_out_dir: Option<String>,
     pub default_template_remote: Option<String>,
     pub user_template_remote: Option<String>,
+    pub default_page: NavPage,
 }
 
 impl Default for TbguiConfig {
@@ -54,6 +55,7 @@ impl Default for TbguiConfig {
             remote_out_dir: Some(REMOTE_OUT_DIR.to_string()),
             default_template_remote: Some(DEFAULT_TEMPLATE_REMOTE.to_string()),
             user_template_remote: Some(USER_TEMPLATE_REMOTE.to_string()),
+            default_page: NavPage::RunTbProfilerView,
         }
     }
 }

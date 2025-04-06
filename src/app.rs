@@ -77,13 +77,20 @@ pub enum Message {
     LaunchUrl(String),
 }
 
+#[derive(Clone, Debug)]
+pub struct Flags {
+    pub config_handler: Option<cosmic_config::Config>,
+    pub config: TbguiConfig,
+}
+
+
 /// Create a COSMIC application from the app model
 impl cosmic::Application for App {
     /// The async executor that will be used to run your application's commands.
     type Executor = cosmic::executor::Default;
 
     /// Data that your application receives to its init method.
-    type Flags = ();
+    type Flags = Flags;
 
     /// Messages which the application and its widgets will emit.
     type Message = Message;
@@ -100,10 +107,7 @@ impl cosmic::Application for App {
     }
 
 
-    fn init(
-        core: cosmic::Core,
-        _flags: Self::Flags,
-    ) -> (Self, Task<cosmic::Action<Self::Message>>) {
+    fn init(core: cosmic::Core, flags: Self::Flags) -> (Self, Task<cosmic::Action<Self::Message>>) {
         let mut nav_model = nav_bar::Model::default();
         for &nav_page in NavPage::all() {
             let id = nav_model
@@ -112,9 +116,9 @@ impl cosmic::Application for App {
                 .text(nav_page.title())
                 .data::<NavPage>(nav_page)
                 .id();
-            // if nav_page == flags.config.default_page {
-            //     nav_model.activate(id);
-            // }
+            if nav_page == flags.config.default_page {
+                nav_model.activate(id);
+            }
         }
 
         // Construct the app model with the runtime's core.
