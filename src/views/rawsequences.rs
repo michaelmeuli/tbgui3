@@ -1,13 +1,13 @@
-use cosmic::iced_widget::scrollable::Direction;
-use cosmic::iced_widget::scrollable::Scrollbar;
 use cosmic::widget;
 use cosmic::Element;
-
 use crate::app::{App, Message};
 use crate::fl;
 
-use cosmic::iced::{Alignment, Length, Subscription};
+use cosmic::iced::Length;
 use cosmic::iced::alignment::{Horizontal, Vertical};
+use cosmic::prelude::*;
+
+
 
 impl App
 where

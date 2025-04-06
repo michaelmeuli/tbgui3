@@ -170,7 +170,7 @@ impl cosmic::Application for App {
 
     
     fn view(&self) -> Element<Self::Message> {
-        widget::text::title1(fl!("welcome"))
+        widget::text::title1("Raw Sequences")
             .apply(widget::container)
             .width(Length::Fill)
             .height(Length::Fill)
