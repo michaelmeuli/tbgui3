@@ -1,12 +1,10 @@
+use crate::app::{App, Message};
 use cosmic::widget;
 use cosmic::Element;
-use crate::app::{App, Message};
 
-use cosmic::iced::Length;
 use cosmic::iced::alignment::{Horizontal, Vertical};
+use cosmic::iced::Length;
 use cosmic::prelude::*;
-
-
 
 impl App
 where

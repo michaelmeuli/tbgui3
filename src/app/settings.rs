@@ -1,9 +1,8 @@
 use cosmic::app::Settings;
 
 use super::localize::localize;
-use crate::app::TbguiConfig;
 use crate::app::Flags;
-
+use crate::app::TbguiConfig;
 
 pub fn settings() -> Settings {
     localize();
@@ -11,10 +10,10 @@ pub fn settings() -> Settings {
         .antialiasing(true)
         .client_decorations(true)
         .debug(false)
-        // .size_limits(
-        //     cosmic::iced::Limits::NONE
-        //         .min_width(360.0)
-        //         .min_height(180.0))
+    // .size_limits(
+    //     cosmic::iced::Limits::NONE
+    //         .min_width(360.0)
+    //         .min_height(180.0))
 }
 
 pub fn flags() -> Flags {

@@ -1,11 +1,11 @@
 use cosmic::widget::menu::key_bind::KeyBind;
 use cosmic::widget::menu::{items, root, Item};
+use cosmic::widget::{self, menu, nav_bar};
 use cosmic::{
     widget::menu::{ItemHeight, ItemWidth, MenuBar, Tree},
     Element,
 };
 use std::collections::HashMap;
-use cosmic::widget::{self, menu, nav_bar};
 
 use crate::app::{Action, Message};
 use crate::fl;

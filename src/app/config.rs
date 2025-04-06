@@ -8,9 +8,6 @@ use super::{App, NavPage};
 
 pub const CONFIG_VERSION: u64 = 1;
 
-
-
-
 pub const TBGUI_USERNAME: &str = default_env(option_env!("TBGUI_USERNAME"), "mimeul");
 pub const REMOTE_RAW_DIR: &str = default_env(
     option_env!("REMOTE_RAW_DIR"),
@@ -32,8 +29,6 @@ pub const USER_TEMPLATE_REMOTE: &str = default_env(
     option_env!("USER_TEMPLATE_REMOTE"),
     "/shares/sander.imm.uzh/MM/PRJEB57919/template/user_template.docx",
 );
-
-
 
 #[derive(Clone, CosmicConfigEntry, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct TbguiConfig {
@@ -85,9 +80,6 @@ impl TbguiConfig {
         }
     }
 }
-
-
-
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub enum AppTheme {

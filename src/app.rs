@@ -1,42 +1,46 @@
-use config::TbguiConfig;
 use crate::fl;
+use config::TbguiConfig;
 use cosmic::app::context_drawer;
 use cosmic::app::Core;
 use cosmic::cosmic_config::{self, CosmicConfigEntry};
 use cosmic::iced::alignment::{Horizontal, Vertical};
 use cosmic::iced::{Alignment, Length, Subscription};
 use cosmic::prelude::*;
+use cosmic::widget::menu::action::MenuAction;
+use cosmic::widget::menu::key_bind::KeyBind;
 use cosmic::widget::{self, nav_bar};
 use cosmic::{cosmic_theme, theme};
 use futures_util::SinkExt;
-use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
-use cosmic::widget::menu::key_bind::KeyBind;
-use cosmic::widget::menu::action::MenuAction;
+use std::collections::HashMap;
 
 const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
 const APP_ICON: &[u8] = include_bytes!("../resources/icons/hicolor/scalable/apps/icon.svg");
 
 pub mod config;
 pub mod icon_cache;
-pub mod settings;
 pub mod localize;
 pub mod menu;
+pub mod settings;
 
 use crate::app::icon_cache::icon_cache_get;
-
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub enum NavPage {
     RunTbProfilerView,
     DownloadResultsView,
     DeleteResultsView,
-    SettingsView
+    SettingsView,
 }
 
 impl NavPage {
     fn all() -> &'static [Self] {
-        &[Self::RunTbProfilerView, Self::DownloadResultsView, Self::DeleteResultsView, Self::SettingsView]
+        &[
+            Self::RunTbProfilerView,
+            Self::DownloadResultsView,
+            Self::DeleteResultsView,
+            Self::SettingsView,
+        ]
     }
 
     fn title(&self) -> String {
@@ -58,7 +62,6 @@ impl NavPage {
     }
 }
 
-
 pub struct App {
     core: Core,
     context_page: ContextPage,
@@ -66,7 +69,6 @@ pub struct App {
     key_binds: HashMap<KeyBind, Action>,
     config: TbguiConfig,
 }
-
 
 #[derive(Debug, Clone)]
 pub enum Message {
@@ -82,7 +84,6 @@ pub struct Flags {
     pub config_handler: Option<cosmic_config::Config>,
     pub config: TbguiConfig,
 }
-
 
 /// Create a COSMIC application from the app model
 impl cosmic::Application for App {
@@ -105,7 +106,6 @@ impl cosmic::Application for App {
     fn core_mut(&mut self) -> &mut cosmic::Core {
         &mut self.core
     }
-
 
     fn init(core: cosmic::Core, flags: Self::Flags) -> (Self, Task<cosmic::Action<Self::Message>>) {
         let mut nav_model = nav_bar::Model::default();
@@ -168,7 +168,7 @@ impl cosmic::Application for App {
             .title(fl!("about")),
         })
     }
-    
+
     fn view(&self) -> Element<Self::Message> {
         let page_view = match self.nav_model.active_data::<NavPage>() {
             Some(NavPage::RunTbProfilerView) => self.view_raw_sequences(),
@@ -279,8 +279,6 @@ impl App {
         }
     }
 }
-
-
 
 /// The context page to display in the context drawer.
 #[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]

@@ -4,7 +4,6 @@ use std::{
     sync::{Mutex, OnceLock},
 };
 
-
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct IconCacheKey {
     name: &'static str,
