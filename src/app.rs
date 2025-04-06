@@ -1,8 +1,6 @@
-use config::{
-    AppError, AppTheme
-};
 use crate::fl;
 use config::TbguiConfig;
+use config::{AppError, AppTheme};
 use cosmic::app::context_drawer;
 use cosmic::app::Core;
 use cosmic::cosmic_config::{self, CosmicConfigEntry};
@@ -83,6 +81,9 @@ pub enum Message {
     LaunchUrl(String),
     AppTheme(AppTheme),
     Error(AppError),
+    DialogComplete((String, String)),
+    DialogCancel,
+    DialogUpdate(DialogPage),
 }
 
 #[derive(Clone, Debug)]
@@ -266,11 +267,23 @@ impl cosmic::Application for App {
                 self.config.app_theme = theme;
                 commands.push(self.save_config());
                 commands.push(self.save_theme());
-            },
+            }
             Message::Error(err) => {
                 eprintln!("Error: {}", err);
                 self.dialog_pages.pop_front();
                 self.dialog_pages.push_back(DialogPage::Info(err));
+            }
+            Message::DialogComplete((city, key)) => {
+                let command = Task::none();
+
+                commands.push(command);
+                commands.push(self.save_config());
+            }
+            Message::DialogCancel => {
+                self.dialog_pages.pop_front();
+            }
+            Message::DialogUpdate(dialog_page) => {
+                self.dialog_pages[0] = dialog_page;
             }
         }
         Task::none()
