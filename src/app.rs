@@ -14,13 +14,6 @@ use serde::{Deserialize, Serialize};
 use cosmic::widget::menu::key_bind::KeyBind;
 use cosmic::widget::menu::action::MenuAction;
 
-
-use cosmic::{
-    widget::{column, container, scrollable},
-    ApplicationExt, Apply, Element,
-};
-
-
 const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
 const APP_ICON: &[u8] = include_bytes!("../resources/icons/hicolor/scalable/apps/icon.svg");
 
@@ -181,24 +174,12 @@ impl cosmic::Application for App {
 
     
     fn view(&self) -> Element<Self::Message> {
-        let page_view = match self.nav_model.active_data::<NavPage>() {
-            Some(NavPage::RunTbProfilerView) => self.view_raw_sequences(),
-            Some(NavPage::DownloadResultsView) => self.view_raw_sequences(),
-            Some(NavPage::DeleteResultsView) => self.view_raw_sequences(),
-            Some(NavPage::SettingsView) => self.view_raw_sequences(),
-            None => cosmic::widget::text("Unkown page selected.").into(),
-        };
-
-        column()
-            .spacing(24)
-            .push(container(page_view).width(Length::Fill))
-            .apply(container)
+        widget::text::title1("Raw Sequences")
+            .apply(widget::container)
             .width(Length::Fill)
-            .max_width(1000)
-            .apply(container)
-            .center_x(Length::Fill)
-            .width(Length::Fill)
-            .apply(scrollable)
+            .height(Length::Fill)
+            .align_x(Horizontal::Center)
+            .align_y(Vertical::Center)
             .into()
     }
 
