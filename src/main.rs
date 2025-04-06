@@ -5,6 +5,7 @@ use app::{
 
 mod app;
 mod model;
+mod views;
 
 
 

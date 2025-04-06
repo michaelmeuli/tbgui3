@@ -167,10 +167,8 @@ impl cosmic::Application for App {
         })
     }
 
-    /// Describes the interface based on the current state of the application model.
-    ///
-    /// Application events will be processed through the view. Any messages emitted by
-    /// events received by widgets will be passed to the update method.
+
+    
     fn view(&self) -> Element<Self::Message> {
         widget::text::title1(fl!("welcome"))
             .apply(widget::container)
