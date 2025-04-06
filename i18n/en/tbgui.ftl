@@ -11,3 +11,8 @@ run-tb-profiler = Run TB-Profiler
 download-results = Download Results
 delete-results = Delete Results
 settings = Settings
+
+## App Themes
+dark = Dark
+light = Light
+system = Match desktop

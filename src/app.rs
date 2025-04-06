@@ -66,6 +66,7 @@ pub struct App {
     nav_model: nav_bar::Model,
     key_binds: HashMap<KeyBind, Action>,
     config: TbguiConfig,
+    app_themes: Vec<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -119,6 +120,8 @@ impl cosmic::Application for App {
             }
         }
 
+        let app_themes = vec![fl!("light"), fl!("dark"), fl!("system")];
+
         // Construct the app model with the runtime's core.
         let mut app = App {
             core,
@@ -138,6 +141,7 @@ impl cosmic::Application for App {
                     }
                 })
                 .unwrap_or_default(),
+            app_themes,
         };
 
         // Create a startup command that sets the window title.
