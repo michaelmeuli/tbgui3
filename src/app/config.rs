@@ -39,6 +39,7 @@ pub struct TbguiConfig {
     pub default_template_remote: Option<String>,
     pub user_template_remote: Option<String>,
     pub default_page: NavPage,
+    pub app_theme: AppTheme,
 }
 
 impl Default for TbguiConfig {
@@ -51,6 +52,7 @@ impl Default for TbguiConfig {
             default_template_remote: Some(DEFAULT_TEMPLATE_REMOTE.to_string()),
             user_template_remote: Some(USER_TEMPLATE_REMOTE.to_string()),
             default_page: NavPage::RunTbProfiler,
+            app_theme: AppTheme::Light,
         }
     }
 }
