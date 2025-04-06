@@ -1,6 +1,6 @@
 use crate::app::{App, Message};
 use crate::fl;
-use cosmic::iced::{Alignment, Length, Subscription};
+use cosmic::iced::Alignment;
 use cosmic::widget;
 use cosmic::Element;
 use cosmic::{cosmic_theme, theme};

@@ -50,7 +50,7 @@ impl Default for TbguiConfig {
             remote_out_dir: Some(REMOTE_OUT_DIR.to_string()),
             default_template_remote: Some(DEFAULT_TEMPLATE_REMOTE.to_string()),
             user_template_remote: Some(USER_TEMPLATE_REMOTE.to_string()),
-            default_page: NavPage::RunTbProfilerView,
+            default_page: NavPage::RunTbProfiler,
         }
     }
 }

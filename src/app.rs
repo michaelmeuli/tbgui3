@@ -4,18 +4,16 @@ use cosmic::app::context_drawer;
 use cosmic::app::Core;
 use cosmic::cosmic_config::{self, CosmicConfigEntry};
 use cosmic::iced::alignment::{Horizontal, Vertical};
-use cosmic::iced::{Alignment, Length, Subscription};
+use cosmic::iced::{Length, Subscription};
 use cosmic::prelude::*;
 use cosmic::widget::menu::action::MenuAction;
 use cosmic::widget::menu::key_bind::KeyBind;
 use cosmic::widget::{self, nav_bar};
-use cosmic::{cosmic_theme, theme};
 use futures_util::SinkExt;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
-const APP_ICON: &[u8] = include_bytes!("../resources/icons/hicolor/scalable/apps/icon.svg");
 
 pub mod config;
 pub mod icon_cache;
@@ -27,37 +25,37 @@ use crate::app::icon_cache::icon_cache_get;
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub enum NavPage {
-    RunTbProfilerView,
-    DownloadResultsView,
-    DeleteResultsView,
-    SettingsView,
+    RunTbProfiler,
+    DownloadResults,
+    DeleteResults,
+    Settings,
 }
 
 impl NavPage {
     fn all() -> &'static [Self] {
         &[
-            Self::RunTbProfilerView,
-            Self::DownloadResultsView,
-            Self::DeleteResultsView,
-            Self::SettingsView,
+            Self::RunTbProfiler,
+            Self::DownloadResults,
+            Self::DeleteResults,
+            Self::Settings,
         ]
     }
 
     fn title(&self) -> String {
         match self {
-            Self::RunTbProfilerView => fl!("run-tb-profiler"),
-            Self::DownloadResultsView => fl!("download-results"),
-            Self::DeleteResultsView => fl!("delete-results"),
-            Self::SettingsView => fl!("settings"),
+            Self::RunTbProfiler => fl!("run-tb-profiler"),
+            Self::DownloadResults => fl!("download-results"),
+            Self::DeleteResults => fl!("delete-results"),
+            Self::Settings => fl!("settings"),
         }
     }
 
     fn icon(&self) -> widget::icon::Icon {
         match self {
-            Self::RunTbProfilerView => icon_cache_get("play", 16),
-            Self::DownloadResultsView => icon_cache_get("download", 16),
-            Self::DeleteResultsView => icon_cache_get("delete", 16),
-            Self::SettingsView => icon_cache_get("settings", 16),
+            Self::RunTbProfiler => icon_cache_get("play", 16),
+            Self::DownloadResults => icon_cache_get("download", 16),
+            Self::DeleteResults => icon_cache_get("delete", 16),
+            Self::Settings => icon_cache_get("settings", 16),
         }
     }
 }
@@ -171,10 +169,10 @@ impl cosmic::Application for App {
 
     fn view(&self) -> Element<Self::Message> {
         let page_view = match self.nav_model.active_data::<NavPage>() {
-            Some(NavPage::RunTbProfilerView) => self.view_raw_sequences(),
-            Some(NavPage::DownloadResultsView) => self.view_raw_sequences(),
-            Some(NavPage::DeleteResultsView) => self.view_raw_sequences(),
-            Some(NavPage::SettingsView) => self.view_raw_sequences(),
+            Some(NavPage::RunTbProfiler) => self.view_raw_sequences(),
+            Some(NavPage::DownloadResults) => self.view_raw_sequences(),
+            Some(NavPage::DeleteResults) => self.view_raw_sequences(),
+            Some(NavPage::Settings) => self.view_raw_sequences(),
             None => cosmic::widget::text("Unkown page selected.").into(),
         };
         page_view
