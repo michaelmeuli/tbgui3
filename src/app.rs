@@ -1,3 +1,6 @@
+use config::{
+    AppError, AppTheme
+};
 use crate::fl;
 use config::TbguiConfig;
 use cosmic::app::context_drawer;
@@ -67,6 +70,7 @@ pub struct App {
     key_binds: HashMap<KeyBind, Action>,
     config: TbguiConfig,
     app_themes: Vec<String>,
+    config_handler: Option<cosmic_config::Config>,
 }
 
 #[derive(Debug, Clone)]
@@ -76,6 +80,7 @@ pub enum Message {
     ToggleContextPage(ContextPage),
     UpdateConfig(TbguiConfig),
     LaunchUrl(String),
+    AppTheme(AppTheme),
 }
 
 #[derive(Clone, Debug)]
@@ -135,6 +140,7 @@ impl cosmic::Application for App {
                 })
                 .unwrap_or_default(),
             app_themes,
+            config_handler: flags.config_handler,
         };
 
         // Create a startup command that sets the window title.
@@ -280,9 +286,20 @@ impl App {
         }
     }
 
+    fn save_config(&mut self) -> Task<Message> {
+        if let Some(ref config_handler) = self.config_handler {
+            if let Err(err) = self.config.write_entry(config_handler) {
+                log::error!("failed to save config: {}", err);
+            }
+        }
+
+        Task::none()
+    }
+
     fn save_theme(&self) -> Task<Message> {
         Task::none()
         //cosmic::app::command::set_theme(self.config.app_theme.theme())
+        //TODO: use the above command to set the theme in the app
     }
 }
 
