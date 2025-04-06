@@ -6,7 +6,7 @@
   <name>tbgui</name>
   <summary>TB-Profiler frontend</summary>
   <icon type="remote" width="64" height="64" scale="1">
-    https://github.com/michaelmeuli/tbgui.git/raw/main/resources/icons/hicolor/scalable/apps/icon.svg
+    https://github.com/michaelmeuli/tbgui.git/raw/main/resources/icons/uzh-logo-white.svg
   </icon>
   <url type="vcs-browser">https://github.com/michaelmeuli/tbgui.git</url>
   <launchable type="desktop-id">ch.uzh.michael.tbgui.desktop</launchable>

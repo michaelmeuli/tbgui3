@@ -6,7 +6,7 @@ use cosmic::Element;
 use cosmic::{cosmic_theme, theme};
 
 const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
-const APP_ICON: &[u8] = include_bytes!("../../resources/icons/hicolor/scalable/apps/icon.svg");
+const APP_ICON: &[u8] = include_bytes!("../../resources/icons/uzh-logo-white.svg");
 
 impl App
 where
