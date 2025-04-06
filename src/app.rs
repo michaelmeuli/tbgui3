@@ -217,6 +217,7 @@ impl cosmic::Application for App {
     /// Tasks may be returned for asynchronous execution of code in the background
     /// on the application's async runtime.
     fn update(&mut self, message: Self::Message) -> Task<cosmic::Action<Self::Message>> {
+        let mut commands = vec![];
         match message {
             Message::OpenRepositoryUrl => {
                 _ = open::that_detached(REPOSITORY);
@@ -247,6 +248,11 @@ impl cosmic::Application for App {
                     eprintln!("failed to open {url:?}: {err}");
                 }
             },
+            Message::AppTheme(theme) => {
+                self.config.app_theme = theme;
+                commands.push(self.save_config());
+                commands.push(self.save_theme());
+            }
         }
         Task::none()
     }
@@ -272,6 +278,11 @@ impl App {
         } else {
             Task::none()
         }
+    }
+
+    fn save_theme(&self) -> Task<Message> {
+        Task::none()
+        //cosmic::app::command::set_theme(self.config.app_theme.theme())
     }
 }
 
