@@ -14,7 +14,7 @@ use cosmic::widget::menu::key_bind::KeyBind;
 use cosmic::widget::{self, nav_bar};
 use futures_util::SinkExt;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 
 const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
 
@@ -71,6 +71,7 @@ pub struct App {
     config: TbguiConfig,
     app_themes: Vec<String>,
     config_handler: Option<cosmic_config::Config>,
+    dialog_pages: VecDeque<DialogPage>,
 }
 
 #[derive(Debug, Clone)]
@@ -81,12 +82,18 @@ pub enum Message {
     UpdateConfig(TbguiConfig),
     LaunchUrl(String),
     AppTheme(AppTheme),
+    Error(AppError),
 }
 
 #[derive(Clone, Debug)]
 pub struct Flags {
     pub config_handler: Option<cosmic_config::Config>,
     pub config: TbguiConfig,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum DialogPage {
+    Info(AppError),
 }
 
 impl cosmic::Application for App {
@@ -141,6 +148,7 @@ impl cosmic::Application for App {
                 .unwrap_or_default(),
             app_themes,
             config_handler: flags.config_handler,
+            dialog_pages: VecDeque::new(),
         };
 
         // Create a startup command that sets the window title.
@@ -258,6 +266,11 @@ impl cosmic::Application for App {
                 self.config.app_theme = theme;
                 commands.push(self.save_config());
                 commands.push(self.save_theme());
+            },
+            Message::Error(err) => {
+                eprintln!("Error: {}", err);
+                self.dialog_pages.pop_front();
+                self.dialog_pages.push_back(DialogPage::Info(err));
             }
         }
         Task::none()
