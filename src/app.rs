@@ -84,17 +84,10 @@ pub struct Flags {
     pub config: TbguiConfig,
 }
 
-/// Create a COSMIC application from the app model
 impl cosmic::Application for App {
-    /// The async executor that will be used to run your application's commands.
     type Executor = cosmic::executor::Default;
-
-    /// Data that your application receives to its init method.
     type Flags = Flags;
-
-    /// Messages which the application and its widgets will emit.
     type Message = Message;
-
     /// Unique identifier in RDNN (reverse domain name notation) format.
     const APP_ID: &'static str = "ch.uzh.michael.tbgui";
 
