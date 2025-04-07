@@ -14,6 +14,7 @@ use futures_util::SinkExt;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, VecDeque};
 use crate::views::nav::NavPage;
+use crate::views::nav::get_nav_model;
 
 const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
 
@@ -76,18 +77,6 @@ impl cosmic::Application for App {
     }
 
     fn init(core: cosmic::Core, flags: Self::Flags) -> (Self, Task<cosmic::Action<Self::Message>>) {
-        let mut nav_model = nav_bar::Model::default();
-        for &nav_page in NavPage::all() {
-            let id = nav_model
-                .insert()
-                .icon(nav_page.icon())
-                .text(nav_page.title())
-                .data::<NavPage>(nav_page)
-                .id();
-            if nav_page == flags.config.default_page {
-                nav_model.activate(id);
-            }
-        }
 
         let app_themes = vec![fl!("light"), fl!("dark"), fl!("system")];
 
@@ -95,7 +84,7 @@ impl cosmic::Application for App {
         let mut app = App {
             core,
             context_page: ContextPage::default(),
-            nav_model,
+            nav_model: get_nav_model(&flags),
             key_binds: HashMap::new(),
             // Optional configuration file for an application.
             config: cosmic_config::Config::new(Self::APP_ID, TbguiConfig::VERSION)

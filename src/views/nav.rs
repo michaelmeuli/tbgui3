@@ -57,7 +57,7 @@ impl NavPage {
 
 
 
-pub fn nav_model(flags: Flags) -> nav_bar::Model {
+pub fn get_nav_model(flags: &Flags) -> nav_bar::Model {
     let mut nav_model = nav_bar::Model::default();
     for &nav_page in NavPage::all() {
         let id = nav_model
