@@ -22,6 +22,7 @@ pub mod localize;
 pub mod menu;
 pub mod settings;
 pub mod ssh;
+pub mod utils;
 
 pub struct App {
     core: Core,
