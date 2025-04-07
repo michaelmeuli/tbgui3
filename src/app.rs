@@ -131,7 +131,7 @@ impl cosmic::Application for App {
             Some(NavPage::RunTbProfiler) => self.view_raw_sequences(),
             Some(NavPage::DownloadResults) => self.view_raw_sequences(),
             Some(NavPage::DeleteResults) => self.view_raw_sequences(),
-            Some(NavPage::Settings) => self.view_raw_sequences(),
+            Some(NavPage::Settings) => self.view_settings(),
             None => cosmic::widget::text("Unkown page selected.").into(),
         };
         page_view
