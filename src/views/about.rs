@@ -1,7 +1,6 @@
 use crate::app::{App, Message};
 use crate::fl;
 use cosmic::iced::Alignment;
-use cosmic::iced_runtime::task::widget;
 use cosmic::widget;
 use cosmic::Element;
 use cosmic::{cosmic_theme, theme};
@@ -14,7 +13,9 @@ where
     Self: cosmic::Application,
 {
     pub fn about(&self) -> Element<Message> {
-        let cosmic_theme::Spacing { space_xxs, space_l, .. } = theme::active().cosmic().spacing;
+        let cosmic_theme::Spacing {
+            space_xxs, space_l, ..
+        } = theme::active().cosmic().spacing;
         let icon = widget::svg(widget::svg::Handle::from_memory(APP_ICON));
         let title = widget::text::title3(fl!("app-title"));
         let hash = env!("VERGEN_GIT_SHA");

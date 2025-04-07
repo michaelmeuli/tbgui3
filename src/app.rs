@@ -1,4 +1,5 @@
 use crate::fl;
+use crate::views::nav::{get_nav_model, Action, ContextPage, NavPage};
 use config::TbguiConfig;
 use config::{AppError, AppTheme};
 use cosmic::app::context_drawer;
@@ -7,14 +8,10 @@ use cosmic::cosmic_config::{self, CosmicConfigEntry};
 use cosmic::iced::alignment::{Horizontal, Vertical};
 use cosmic::iced::{Length, Subscription};
 use cosmic::prelude::*;
-use cosmic::widget::menu::action::MenuAction;
 use cosmic::widget::menu::key_bind::KeyBind;
 use cosmic::widget::{self, nav_bar};
 use futures_util::SinkExt;
-use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, VecDeque};
-use crate::views::nav::NavPage;
-use crate::views::nav::get_nav_model;
 
 const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
 
@@ -23,7 +20,6 @@ pub mod icon_cache;
 pub mod localize;
 pub mod menu;
 pub mod settings;
-
 
 pub struct App {
     core: Core,
@@ -77,7 +73,6 @@ impl cosmic::Application for App {
     }
 
     fn init(core: cosmic::Core, flags: Self::Flags) -> (Self, Task<cosmic::Action<Self::Message>>) {
-
         let app_themes = vec![fl!("light"), fl!("dark"), fl!("system")];
 
         // Construct the app model with the runtime's core.
@@ -278,27 +273,5 @@ impl App {
         Task::none()
         //cosmic::app::command::set_theme(self.config.app_theme.theme())
         //TODO: use the above command to set the theme in the app
-    }
-}
-
-/// The context page to display in the context drawer.
-#[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
-pub enum ContextPage {
-    #[default]
-    About,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum Action {
-    About,
-}
-
-impl MenuAction for Action {
-    type Message = Message;
-
-    fn message(&self) -> Self::Message {
-        match self {
-            Action::About => Message::ToggleContextPage(ContextPage::About),
-        }
     }
 }

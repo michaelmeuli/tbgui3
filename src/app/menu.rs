@@ -1,5 +1,5 @@
+use cosmic::widget::menu;
 use cosmic::widget::menu::key_bind::KeyBind;
-use cosmic::widget::{menu};
 use cosmic::Element;
 use std::collections::HashMap;
 

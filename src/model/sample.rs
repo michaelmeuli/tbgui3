@@ -1,10 +1,7 @@
+use cosmic::iced::Length;
 use cosmic::widget::{checkbox, text};
 use cosmic::Element;
-use cosmic::iced::Length;
 use uuid::Uuid;
-
-
-
 
 #[derive(Debug, Clone)]
 pub struct Item {

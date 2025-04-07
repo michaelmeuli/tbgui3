@@ -1,20 +1,10 @@
-use crate::fl;
-use cosmic::cosmic_config::{self, CosmicConfigEntry};
-use cosmic::iced::alignment::{Horizontal, Vertical};
-use cosmic::iced::{Length, Subscription};
-use cosmic::prelude::*;
-use cosmic::widget::menu::action::MenuAction;
-use cosmic::widget::menu::key_bind::KeyBind;
-use cosmic::widget::{self, nav_bar};
-use futures_util::SinkExt;
-use serde::{Deserialize, Serialize};
-use std::collections::{HashMap, VecDeque};
 use crate::app::icon_cache::icon_cache_get;
-use crate::app::{App, Message};
 use crate::app::Flags;
-
-const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
-
+use crate::app::Message;
+use crate::fl;
+use cosmic::widget::menu::action::MenuAction;
+use cosmic::widget::{self, nav_bar};
+use serde::{Deserialize, Serialize};
 
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -54,9 +44,6 @@ impl NavPage {
     }
 }
 
-
-
-
 pub fn get_nav_model(flags: &Flags) -> nav_bar::Model {
     let mut nav_model = nav_bar::Model::default();
     for &nav_page in NavPage::all() {
@@ -73,4 +60,24 @@ pub fn get_nav_model(flags: &Flags) -> nav_bar::Model {
     nav_model
 }
 
+/// The context page to display in the context drawer.
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
+pub enum ContextPage {
+    #[default]
+    About,
+}
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Action {
+    About,
+}
+
+impl MenuAction for Action {
+    type Message = Message;
+
+    fn message(&self) -> Self::Message {
+        match self {
+            Action::About => Message::ToggleContextPage(ContextPage::About),
+        }
+    }
+}
