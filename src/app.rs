@@ -12,6 +12,7 @@ use cosmic::widget::menu::key_bind::KeyBind;
 use cosmic::widget::{self, nav_bar};
 use futures_util::SinkExt;
 use std::collections::{HashMap, VecDeque};
+use cosmic::{cosmic_theme, theme};
 
 const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
 
@@ -124,6 +125,41 @@ impl cosmic::Application for App {
             )
             .title(fl!("about")),
         })
+    }
+
+    fn dialog(&self) -> Option<Element<Message>> {
+        let dialog_page = match self.dialog_pages.front() {
+            Some(some) => some,
+            None => return None,
+        };
+
+        let cosmic_theme::Spacing { space_xxs, .. } = theme::active().cosmic().spacing;
+
+        let dialog = match dialog_page {
+            DialogPage::Info(app_errored) => {
+                let mut content = widget::column::with_capacity(2).spacing(12);
+
+                match app_errored {
+                    AppError::ListFilesRemoteDir(body) => {
+                        let title = widget::text::title4("Failed to list files in remote directory");
+                        content = content.push(title);
+                        content = content.push(widget::text(body));
+                    }
+                    AppError::NoItemsChecked(body) => {
+                        let title = widget::text::title4("Cannot run tbprofiler with zero items checked");
+                        content = content.push(title);
+                        content = content.push(widget::text::body(body));
+                    }
+                }
+                widget::dialog()
+                .secondary_action(
+                    widget::button::standard(fl!("cancel")).on_press(Message::DialogCancel),
+                )
+                .control(content)
+            }
+            
+        };
+        Some(dialog.into())
     }
 
     fn view(&self) -> Element<Self::Message> {

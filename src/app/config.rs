@@ -111,15 +111,15 @@ impl AppTheme {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum AppError {
-    Location(String),
-    Weather(String),
+    ListFilesRemoteDir(String),
+    NoItemsChecked(String),
 }
 
 impl std::fmt::Display for AppError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AppError::Location(err) => write!(f, "{}", err),
-            AppError::Weather(err) => write!(f, "{}", err),
+            AppError::ListFilesRemoteDir(err) => write!(f, "{}", err),
+            AppError::NoItemsChecked(err) => write!(f, "{}", err),
         }
     }
 }

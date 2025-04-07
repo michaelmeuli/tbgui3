@@ -5,6 +5,8 @@ welcome = Welcome to COSMIC! ✨
 page-id = Page { $num }
 git-description = Git commit {$hash} on {$date}
 
+# Dialog Page
+cancel = Cancel
 
 # Nav Page
 run-tb-profiler = Run TB-Profiler
