@@ -21,6 +21,7 @@ pub mod icon_cache;
 pub mod localize;
 pub mod menu;
 pub mod settings;
+pub mod ssh;
 
 pub struct App {
     core: Core,
