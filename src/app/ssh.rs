@@ -1,5 +1,5 @@
-use crate::config::TbguiConfig;
-use crate::types::RemoteState;
+use super::config::TbguiConfig;
+use crate::model::sample::RemoteState;
 use crate::utils::*;
 use crate::{DEFAULT_TEMPLATE_FILENAME_LOCAL, RESULT_DIR_LOCAL};
 use async_ssh2_tokio::client::{AuthMethod, Client, ServerCheckMethod};
