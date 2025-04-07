@@ -13,6 +13,7 @@ use cosmic::widget::{self, nav_bar};
 use futures_util::SinkExt;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, VecDeque};
+use crate::views::nav::NavPage;
 
 const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
 
@@ -22,44 +23,6 @@ pub mod localize;
 pub mod menu;
 pub mod settings;
 
-use crate::app::icon_cache::icon_cache_get;
-
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
-pub enum NavPage {
-    RunTbProfiler,
-    DownloadResults,
-    DeleteResults,
-    Settings,
-}
-
-impl NavPage {
-    fn all() -> &'static [Self] {
-        &[
-            Self::RunTbProfiler,
-            Self::DownloadResults,
-            Self::DeleteResults,
-            Self::Settings,
-        ]
-    }
-
-    fn title(&self) -> String {
-        match self {
-            Self::RunTbProfiler => fl!("run-tb-profiler"),
-            Self::DownloadResults => fl!("download-results"),
-            Self::DeleteResults => fl!("delete-results"),
-            Self::Settings => fl!("settings"),
-        }
-    }
-
-    fn icon(&self) -> widget::icon::Icon {
-        match self {
-            Self::RunTbProfiler => icon_cache_get("play", 16),
-            Self::DownloadResults => icon_cache_get("download", 16),
-            Self::DeleteResults => icon_cache_get("delete", 16),
-            Self::Settings => icon_cache_get("settings", 16),
-        }
-    }
-}
 
 pub struct App {
     core: Core,
