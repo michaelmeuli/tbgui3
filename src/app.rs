@@ -153,6 +153,11 @@ impl cosmic::Application for App {
                         content = content.push(title);
                         content = content.push(widget::text::body(body));
                     }
+                    AppError::IO(body) => {
+                        let title = widget::text::title4("IO error");
+                        content = content.push(title);
+                        content = content.push(widget::text(body));
+                    }
                 }
                 widget::dialog()
                     .secondary_action(

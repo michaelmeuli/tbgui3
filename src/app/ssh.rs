@@ -194,8 +194,10 @@ pub async fn delete_results(
 pub async fn download_default_template(
     client: &Client,
     config: &TbguiConfig,
-) -> Result<(), async_ssh2_tokio::Error> {
-    let remote_file_path = config.default_template_remote.as_str();
+) -> Result<(), AppError> {
+    let remote_file_path = config.default_template_remote.as_deref().ok_or_else(|| {
+        AppError::Network("Default template remote is not set in the configuration".to_string())
+    })?;
     let save_directory: Option<PathBuf> = FileDialog::new()
         .set_title("Select directory to save template")
         .set_directory(UserDirs::new().unwrap().home_dir())
@@ -225,7 +227,10 @@ pub async fn download_default_template(
     let local_file_path = save_directory.join(file_name);
 
     let channel = client.get_channel().await?;
-    channel.request_subsystem(true, "sftp").await?;
+    channel
+        .request_subsystem(true, "sftp")
+        .await
+        .map_err(|e| AppError::Network(format!("Failed to request SFTP subsystem: {e:?}")))?;
     let sftp = SftpSession::new(channel.into_stream()).await?;
 
     download_file(&sftp, remote_file_path, &local_file_path).await?;
@@ -235,8 +240,10 @@ pub async fn download_default_template(
 pub async fn upload_user_template(
     client: &Client,
     config: &TbguiConfig,
-) -> Result<(), async_ssh2_tokio::Error> {
-    let remote_file_path = config.user_template_remote.as_str();
+) -> Result<(), AppError> {
+    let remote_file_path = config.user_template_remote.as_deref().ok_or_else(|| {
+        AppError::Network("User template remote is not set in the configuration".to_string())
+    })?;
     let local_file_path: Option<PathBuf> = FileDialog::new()
         .set_title("Select File to Upload")
         .set_directory(UserDirs::new().unwrap().home_dir())
@@ -250,7 +257,10 @@ pub async fn upload_user_template(
     };
 
     let channel = client.get_channel().await?;
-    channel.request_subsystem(true, "sftp").await?;
+    channel
+        .request_subsystem(true, "sftp")
+        .await
+        .map_err(|e| AppError::Network(format!("Failed to request SFTP subsystem: {e:?}")))?;
     client
         .upload_file(local_file_path, remote_file_path)
         .await?;

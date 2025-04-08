@@ -122,6 +122,7 @@ impl std::fmt::Display for AppError {
         match self {
             AppError::Network(err) => write!(f, "{}", err),
             AppError::NoItemsChecked(err) => write!(f, "{}", err),
+            AppError::IO(err) => write!(f, "{}", err),
         }
     }
 }
