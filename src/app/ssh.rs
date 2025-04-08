@@ -1,6 +1,6 @@
-use super::config::TbguiConfig;
+use super::config::{AppError, TbguiConfig};
+use super::utils::*;
 use crate::model::sample::RemoteState;
-use crate::utils::*;
 use crate::{DEFAULT_TEMPLATE_FILENAME_LOCAL, RESULT_DIR_LOCAL};
 use async_ssh2_tokio::client::{AuthMethod, Client, ServerCheckMethod};
 use directories_next::UserDirs; // TODO: Remove this dependency
@@ -11,16 +11,24 @@ use std::fs;
 use std::path::PathBuf;
 use tokio::fs::create_dir_all;
 
-pub async fn create_client(config: &TbguiConfig) -> Result<Client, async_ssh2_tokio::Error> {
+pub async fn create_client(config: &TbguiConfig) -> Result<Client, AppError> {
     let key_path = UserDirs::new()
         .unwrap()
         .home_dir()
         .join(".ssh")
         .join("id_rsa");
+    if !key_path.exists() {
+        return Err(AppError::Network(format!(
+            "SSH key file not found at path: {:?}",
+            key_path
+        )));
+    }
     let auth_method = AuthMethod::with_key_file(key_path, None);
     let client = Client::connect(
         ("130.60.24.133", 22),
-        config.username.as_str(),
+        config.username.as_deref().ok_or_else(|| {
+            AppError::Network("Username is not set in the configuration".to_string())
+        })?,
         auth_method,
         ServerCheckMethod::NoCheck,
     )
@@ -28,10 +36,7 @@ pub async fn create_client(config: &TbguiConfig) -> Result<Client, async_ssh2_to
     Ok(client)
 }
 
-pub async fn get_raw_reads(
-    client: &Client,
-    config: &TbguiConfig,
-) -> Result<RemoteState, async_ssh2_tokio::Error> {
+pub async fn get_raw_reads(client: &Client, config: &TbguiConfig) -> Result<RemoteState, AppError> {
     let remote_raw_dir: &str = config.remote_raw_dir.as_str();
     check_if_dir_exists(client, remote_raw_dir).await?;
     let command = format!("ls {}", remote_raw_dir);
