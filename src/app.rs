@@ -102,6 +102,8 @@ impl cosmic::Application for App {
             dialog_pages: VecDeque::new(),
         };
 
+        app.core.nav_bar_set_toggled(false);
+
         // Create a startup command that sets the window title.
         let command = app.update_title();
 
