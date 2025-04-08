@@ -37,25 +37,26 @@ pub async fn create_client(config: &TbguiConfig) -> Result<Client, AppError> {
 }
 
 pub async fn get_raw_reads(client: &Client, config: &TbguiConfig) -> Result<RemoteState, AppError> {
-    let remote_raw_dir: &str = config.remote_raw_dir.as_str();
+    let remote_raw_dir = config
+        .remote_raw_dir
+        .as_deref()
+        .ok_or_else(|| AppError::Network("Remote raw directory is not set in the configuration".to_string()))?;
+
     check_if_dir_exists(client, remote_raw_dir).await?;
+
     let command = format!("ls {}", remote_raw_dir);
     let result = client.execute(&command).await.map_err(|e| {
-        log_error(&format!(
-            "Failed to list files in remote directory: {:?}",
-            e
-        ));
-        async_ssh2_tokio::Error::from(std::io::Error::new(
-            std::io::ErrorKind::Other,
-            format!("Failed to list files in remote directory: {:?}", e),
-        ))
+        let msg = format!("Failed to list files in remote directory: {:?}", e);
+        log_error(&msg);
+        AppError::Network(msg)
     })?;
-    let stdout = result.stdout;
 
-    let raw_reads: Vec<String> = stdout.lines().map(String::from).collect();
+    let raw_reads: Vec<String> = result.stdout.lines().map(String::from).collect();
     let tasks = create_tasks(raw_reads);
+
     Ok(RemoteState { items: tasks })
 }
+
 
 pub async fn run_tbprofiler(
     client: &Client,

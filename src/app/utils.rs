@@ -75,27 +75,19 @@ pub fn create_tasks(reads: Vec<String>) -> Vec<Item> {
 pub async fn check_if_dir_exists(
     client: &Client,
     remote_raw_dir: &str,
-) -> Result<(), async_ssh2_tokio::Error> {
+) -> Result<(), AppError> {
     let command = format!("test -d {} && echo 'exists'", remote_raw_dir);
+    
     let result = client.execute(&command).await.map_err(|e| {
-        log_error(&format!(
-            "Failed to check if remote directory exists: {:?}",
-            e
-        ));
-        async_ssh2_tokio::Error::from(std::io::Error::new(
-            std::io::ErrorKind::Other,
-            format!("Failed to check if remote directory exists: {:?}", e),
-        ))
+        let msg = format!("Failed to check if remote directory exists: {:?}", e);
+        log_error(&msg);
+        AppError::Network(msg)
     })?;
+
     if result.stdout.trim() != "exists" {
-        log_error(&format!(
-            "Remote directory does not exist: {:?}",
-            remote_raw_dir
-        ));
-        Err(async_ssh2_tokio::Error::from(std::io::Error::new(
-            std::io::ErrorKind::Other,
-            format!("Remote directory does not exist: {:?}", remote_raw_dir),
-        )))
+        let msg = format!("Remote directory does not exist: {:?}", remote_raw_dir);
+        log_error(&msg);
+        Err(AppError::Network(msg))
     } else {
         Ok(())
     }
