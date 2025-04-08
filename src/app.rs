@@ -1,5 +1,6 @@
 use crate::fl;
 use crate::views::nav::{get_nav_model, Action, ContextPage, NavPage};
+use async_ssh2_tokio::client::{self, Client};
 use config::TbguiConfig;
 use config::{AppError, AppTheme};
 use cosmic::app::context_drawer;
@@ -12,6 +13,7 @@ use cosmic::widget::menu::key_bind::KeyBind;
 use cosmic::widget::{self, nav_bar};
 use cosmic::{cosmic_theme, theme};
 use futures_util::SinkExt;
+use ssh::create_client;
 use std::collections::{HashMap, VecDeque};
 
 const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
@@ -28,6 +30,7 @@ pub struct App {
     core: Core,
     context_page: ContextPage,
     nav_model: nav_bar::Model,
+    client: Option<Client>,
     key_binds: HashMap<KeyBind, Action>,
     config: TbguiConfig,
     app_themes: Vec<String>,
@@ -37,6 +40,7 @@ pub struct App {
 
 #[derive(Debug, Clone)]
 pub enum Message {
+    ClientInitialized(Client),
     OpenRepositoryUrl,
     SubscriptionChannel,
     ToggleContextPage(ContextPage),
@@ -76,6 +80,7 @@ impl cosmic::Application for App {
     }
 
     fn init(core: cosmic::Core, flags: Self::Flags) -> (Self, Task<cosmic::Action<Self::Message>>) {
+        let mut commands = vec![];
         let app_themes = vec![fl!("light"), fl!("dark"), fl!("system")];
 
         // Construct the app model with the runtime's core.
@@ -83,6 +88,7 @@ impl cosmic::Application for App {
             core,
             context_page: ContextPage::default(),
             nav_model: get_nav_model(&flags),
+            client: None,
             key_binds: HashMap::new(),
             // Optional configuration file for an application.
             config: cosmic_config::Config::new(Self::APP_ID, TbguiConfig::VERSION)
@@ -102,12 +108,29 @@ impl cosmic::Application for App {
             dialog_pages: VecDeque::new(),
         };
 
+        // Asynchronously initialize the client
+        let config_clone = app.config.clone();
+        let command = Task::perform(
+            async move {
+                let client = create_client(&config_clone).await;
+                client
+            },
+            |client| match client { 
+                Ok(client) => {
+                    cosmic::Action::App(Message::ClientInitialized(client))
+                },
+                Err(err) => cosmic::Action::App(Message::Error(err)),
+            },
+        );
+        commands.push(command);
+
         app.core.nav_bar_set_toggled(false);
 
-        // Create a startup command that sets the window title.
+        // Create a startup command that sets the window title.  //TODO?
         let command = app.update_title();
+        commands.push(command);
 
-        (app, command)
+        (app, Task::batch(commands))
     }
 
     fn header_start(&self) -> Vec<Element<Self::Message>> {
@@ -276,6 +299,9 @@ impl cosmic::Application for App {
             }
             Message::DialogUpdate(dialog_page) => {
                 self.dialog_pages[0] = dialog_page;
+            }
+            Message::ClientInitialized(client) => {
+                self.client = Some(client);
             }
         }
         Task::none()
