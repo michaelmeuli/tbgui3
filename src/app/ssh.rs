@@ -3,6 +3,7 @@ use super::utils::*;
 use crate::model::sample::RemoteState;
 use crate::{DEFAULT_TEMPLATE_FILENAME_LOCAL, RESULT_DIR_LOCAL};
 use async_ssh2_tokio::client::{AuthMethod, Client, ServerCheckMethod};
+use cosmic::cosmic_theme::palette::white_point::A;
 use directories_next::UserDirs; // TODO: Remove this dependency
 use rfd::FileDialog; // TODO: Remove this dependency
 use russh_sftp::client::fs::ReadDir;
@@ -96,12 +97,17 @@ pub async fn run_tbprofiler(
 pub async fn download_results(
     client: &Client,
     config: &TbguiConfig,
-) -> Result<(), async_ssh2_tokio::Error> {
+) -> Result<(), AppError> {
     let channel = client.get_channel().await?;
     channel.request_subsystem(true, "sftp").await?;
     let sftp = SftpSession::new(channel.into_stream()).await?;
 
-    let remote_dir = format!("{}/results", config.remote_out_dir);
+    let remote_dir = format!(
+        "{}/results",
+        config.remote_out_dir.as_deref().ok_or_else(|| {
+            AppError::Network("Remote out directory is not set in the configuration".to_string())
+        })?
+    );
     let remote_dir: &str = remote_dir.as_str();
     println!(
         "Downloading results from remote directory: {:?}",
@@ -118,10 +124,9 @@ pub async fn download_results(
     let local_dir = match local_dir {
         Some(dir) => dir,
         None => {
-            return Err(async_ssh2_tokio::Error::from(std::io::Error::new(
-                std::io::ErrorKind::NotFound,
-                "No directory selected",
-            )));
+            return Err(AppError::Network(
+                "No directory selected for downloading results".to_string(),
+            ));
         }
     };
     check_if_dir_exists(client, remote_dir).await?;

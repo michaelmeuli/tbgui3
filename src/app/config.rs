@@ -4,6 +4,7 @@ use cosmic::{
 };
 use serde::{Deserialize, Serialize};
 
+
 use super::{App, NavPage};
 
 pub const CONFIG_VERSION: u64 = 1;
@@ -126,6 +127,18 @@ impl std::fmt::Display for AppError {
 
 impl From<async_ssh2_tokio::Error> for AppError {
     fn from(error: async_ssh2_tokio::Error) -> Self {
-        AppError::Network(format!("SSH error: {}", error))
+        AppError::Network(format!("async_ssh2_tokio error: {}", error))
+    }
+}
+
+impl From<std::io::Error> for AppError {
+    fn from(error: std::io::Error) -> Self {
+        AppError::Network(format!("std::io::Error: {}", error))
+    }
+}
+
+impl From<russh_sftp::client::error::Error> for AppError {
+    fn from(error: russh_sftp::client::error::Error) -> Self {
+        AppError::Network(format!("russh_sftp::client::error::Error: {}", error))
     }
 }
