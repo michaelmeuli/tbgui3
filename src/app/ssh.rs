@@ -3,10 +3,8 @@ use super::utils::*;
 use crate::model::sample::RemoteState;
 use crate::{DEFAULT_TEMPLATE_FILENAME_LOCAL, RESULT_DIR_LOCAL};
 use async_ssh2_tokio::client::{AuthMethod, Client, ServerCheckMethod};
-use cosmic::cosmic_theme::palette::white_point::A;
 use directories_next::UserDirs; // TODO: Remove this dependency
 use rfd::FileDialog; // TODO: Remove this dependency
-use russh_sftp::client::fs::ReadDir;
 use russh_sftp::client::SftpSession;
 use std::fs;
 use std::path::PathBuf;
@@ -94,56 +92,63 @@ pub async fn run_tbprofiler(
     Ok(commandexecutedresult_run_tbprofiler.stdout)
 }
 
-pub async fn download_results(
-    client: &Client,
-    config: &TbguiConfig,
-) -> Result<(), AppError> {
-    let channel = client.get_channel().await?;
-    channel.request_subsystem(true, "sftp").await?;
-    let sftp = SftpSession::new(channel.into_stream()).await?;
+pub async fn download_results(client: &Client, config: &TbguiConfig) -> Result<(), AppError> {
+    let remote_out_dir = config.remote_out_dir.as_deref().ok_or_else(|| {
+        AppError::Network("Remote out directory is not set in the configuration".to_string())
+    })?;
+    let remote_dir = format!("{}/results", remote_out_dir);
 
-    let remote_dir = format!(
-        "{}/results",
-        config.remote_out_dir.as_deref().ok_or_else(|| {
-            AppError::Network("Remote out directory is not set in the configuration".to_string())
-        })?
-    );
-    let remote_dir: &str = remote_dir.as_str();
-    println!(
-        "Downloading results from remote directory: {:?}",
-        remote_dir
-    );
+    let channel = client
+        .get_channel()
+        .await
+        .map_err(|e| AppError::Network(format!("Failed to open SSH channel: {e:?}")))?;
+    channel
+        .request_subsystem(true, "sftp")
+        .await
+        .map_err(|e| AppError::Network(format!("Failed to request SFTP subsystem: {e:?}")))?;
+    let sftp = SftpSession::new(channel.into_stream())
+        .await
+        .map_err(|e| AppError::Network(format!("Failed to start SFTP session: {e:?}")))?;
+
+    println!("Downloading results from remote directory: {:?}", remote_dir);
+
     let default_local_dir = UserDirs::new().unwrap().home_dir().join(RESULT_DIR_LOCAL);
     if !default_local_dir.exists() {
-        create_dir_all(&default_local_dir).await?;
+        create_dir_all(&default_local_dir)
+            .await
+            .map_err(|e| AppError::IO(format!("Failed to create default local directory: {e:?}")))?;
     }
-    let local_dir: Option<PathBuf> = FileDialog::new()
+    let local_dir = FileDialog::new()
         .set_title("Select directory to download results")
-        .set_directory(UserDirs::new().unwrap().home_dir().join(RESULT_DIR_LOCAL))
-        .pick_folder();
-    let local_dir = match local_dir {
-        Some(dir) => dir,
-        None => {
-            return Err(AppError::Network(
-                "No directory selected for downloading results".to_string(),
-            ));
-        }
-    };
-    check_if_dir_exists(client, remote_dir).await?;
-    create_dir_all(local_dir.clone()).await?;
-    let entries: ReadDir = sftp.read_dir(remote_dir).await?;
+        .set_directory(&default_local_dir)
+        .pick_folder()
+        .ok_or_else(|| {
+            AppError::Network("No directory selected for downloading results".to_string())
+        })?;
+
+    check_if_dir_exists(client, &remote_dir).await?;
+
+    create_dir_all(&local_dir)
+        .await
+        .map_err(|e| AppError::IO(format!("Failed to create selected local directory: {e:?}")))?;
+    let entries = sftp
+        .read_dir(&remote_dir)
+        .await
+        .map_err(|e| AppError::Network(format!("Failed to list remote directory: {e:?}")))?;
     for entry in entries {
         let file_name = entry.file_name();
         let file_type = entry.file_type();
         let remote_file_path = format!("{}/{}", remote_dir, file_name);
-        let local_file_path = local_dir.join(&file_name).clone();
+        let local_file_path = local_dir.join(&file_name);
 
-        if file_type.is_file() && (file_name).ends_with(".docx") {
+        if file_type.is_file() && file_name.ends_with(".docx") {
             download_file(&sftp, &remote_file_path, &local_file_path).await?;
         }
     }
+
     Ok(())
 }
+
 
 pub async fn delete_results(
     client: &Client,

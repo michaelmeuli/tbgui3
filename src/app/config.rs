@@ -114,6 +114,7 @@ impl AppTheme {
 pub enum AppError {
     Network(String),
     NoItemsChecked(String),
+    IO(String),
 }
 
 impl std::fmt::Display for AppError {
@@ -142,3 +143,4 @@ impl From<russh_sftp::client::error::Error> for AppError {
         AppError::Network(format!("russh_sftp::client::error::Error: {}", error))
     }
 }
+
