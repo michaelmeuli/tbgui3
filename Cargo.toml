@@ -21,7 +21,7 @@ russh-sftp = "2.0.6"
 rust-embed = "8.5.0"
 serde = "1.0.219"
 tokio = { version = "1.41.0", features = ["full"] }
-uuid = "1.16.0"
+uuid = { version = "1.16.0", features = ["v4", "fast-rng", "serde"] }
 
 [dependencies.i18n-embed]
 version = "0.15"
