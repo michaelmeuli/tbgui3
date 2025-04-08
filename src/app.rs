@@ -142,8 +142,8 @@ impl cosmic::Application for App {
                 let mut content = widget::column::with_capacity(2).spacing(12);
 
                 match app_errored {
-                    AppError::ListFilesRemoteDir(body) => {
-                        let title = widget::text::title4("Failed to list files in remote directory");
+                    AppError::Network(body) => {
+                        let title = widget::text::title4("Network error");
                         content = content.push(title);
                         content = content.push(widget::text(body));
                     }

@@ -1,9 +1,7 @@
 use crate::RESULT_DIR_LOCAL;
-use super::config::{TbguiConfig, AppError, AppTheme};
-use super::App;
+use super::config::{TbguiConfig, AppError};
 use crate::model::sample::Item;
 use async_ssh2_tokio::client::Client;
-use cosmic::command;
 use directories_next::UserDirs;
 use russh_sftp::{client::SftpSession, protocol::OpenFlags};
 use std::collections::HashSet;
@@ -46,7 +44,7 @@ pub async fn check_if_running(
 ) -> Result<bool, AppError> {
     let command_check_running = match config.username {
         Some(username) => format!("squeue -u {}", username),
-        None => return Err(AppError::Username("Username is not set in the configuration".to_string())),
+        None => return Err(AppError::Network("Username is not set in the configuration".to_string())),
     };
     let commandexecutedresult_check_if_running = client.execute(&command_check_running).await?;
     let running = commandexecutedresult_check_if_running

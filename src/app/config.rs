@@ -111,16 +111,14 @@ impl AppTheme {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum AppError {
-    Username(String),
-    ListFilesRemoteDir(String),
+    Network(String),
     NoItemsChecked(String),
 }
 
 impl std::fmt::Display for AppError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AppError::Username(err) => write!(f, "{}", err),
-            AppError::ListFilesRemoteDir(err) => write!(f, "{}", err),
+            AppError::Network(err) => write!(f, "{}", err),
             AppError::NoItemsChecked(err) => write!(f, "{}", err),
         }
     }
