@@ -3,10 +3,10 @@ use crate::model::sample::RemoteState;
 use crate::utils::*;
 use crate::{DEFAULT_TEMPLATE_FILENAME_LOCAL, RESULT_DIR_LOCAL};
 use async_ssh2_tokio::client::{AuthMethod, Client, ServerCheckMethod};
-use directories_next::UserDirs;  // TODO: Remove this dependency
-use rfd::FileDialog;  // TODO: Remove this dependency
-use russh_sftp::client::SftpSession;
+use directories_next::UserDirs; // TODO: Remove this dependency
+use rfd::FileDialog; // TODO: Remove this dependency
 use russh_sftp::client::fs::ReadDir;
+use russh_sftp::client::SftpSession;
 use std::fs;
 use std::path::PathBuf;
 use tokio::fs::create_dir_all;

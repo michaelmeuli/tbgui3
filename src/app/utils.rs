@@ -1,6 +1,6 @@
-use crate::RESULT_DIR_LOCAL;
-use super::config::{TbguiConfig, AppError};
+use super::config::{AppError, TbguiConfig};
 use crate::model::sample::Item;
+use crate::RESULT_DIR_LOCAL;
 use async_ssh2_tokio::client::Client;
 use directories_next::UserDirs;
 use russh_sftp::{client::SftpSession, protocol::OpenFlags};
@@ -9,7 +9,7 @@ use std::fs::{self, OpenOptions};
 use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
-use tokio::fs::{File, create_dir_all};
+use tokio::fs::{create_dir_all, File};
 use tokio::io::AsyncReadExt;
 use tokio::io::AsyncWriteExt;
 use uuid::Uuid;
@@ -38,18 +38,19 @@ pub async fn download_file(
     Ok(())
 }
 
-pub async fn check_if_running(
-    client: &Client,
-    config: &TbguiConfig,
-) -> Result<bool, AppError> {
-    let command_check_running = match config.username {
-        Some(username) => format!("squeue -u {}", username),
-        None => return Err(AppError::Network("Username is not set in the configuration".to_string())),
-    };
+pub async fn check_if_running(client: &Client, config: &TbguiConfig) -> Result<bool, AppError> {
+    let username = config
+        .username
+        .as_deref()
+        .ok_or_else(|| AppError::Network("Username is not set in the configuration".to_string()))?;
+
+    let command_check_running = format!("squeue -u {}", username);
     let commandexecutedresult_check_if_running = client.execute(&command_check_running).await?;
+
     let running = commandexecutedresult_check_if_running
         .stdout
-        .contains(config.username.as_str());
+        .contains(username);
+
     Ok(running)
 }
 

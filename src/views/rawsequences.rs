@@ -18,10 +18,8 @@ where
             .align_x(Horizontal::Center);
 
         let mut run_controls = widget::row();
-        run_controls = run_controls.push(
-            widget::button::standard("Run Profiler")
-                .on_press(Message::OpenRepositoryUrl)
-        );
+        run_controls = run_controls
+            .push(widget::button::standard("Run Profiler").on_press(Message::OpenRepositoryUrl));
         let content = widget::column()
             .push(title)
             .push(widget::vertical_space().height(20))

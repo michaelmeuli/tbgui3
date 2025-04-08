@@ -10,9 +10,9 @@ use cosmic::iced::{Length, Subscription};
 use cosmic::prelude::*;
 use cosmic::widget::menu::key_bind::KeyBind;
 use cosmic::widget::{self, nav_bar};
+use cosmic::{cosmic_theme, theme};
 use futures_util::SinkExt;
 use std::collections::{HashMap, VecDeque};
-use cosmic::{cosmic_theme, theme};
 
 const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
 
@@ -148,18 +148,18 @@ impl cosmic::Application for App {
                         content = content.push(widget::text(body));
                     }
                     AppError::NoItemsChecked(body) => {
-                        let title = widget::text::title4("Cannot run tbprofiler with zero items checked");
+                        let title =
+                            widget::text::title4("Cannot run tbprofiler with zero items checked");
                         content = content.push(title);
                         content = content.push(widget::text::body(body));
                     }
                 }
                 widget::dialog()
-                .secondary_action(
-                    widget::button::standard(fl!("cancel")).on_press(Message::DialogCancel),
-                )
-                .control(content)
+                    .secondary_action(
+                        widget::button::standard(fl!("cancel")).on_press(Message::DialogCancel),
+                    )
+                    .control(content)
             }
-            
         };
         Some(dialog.into())
     }

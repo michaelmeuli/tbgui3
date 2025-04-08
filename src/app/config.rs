@@ -124,3 +124,8 @@ impl std::fmt::Display for AppError {
     }
 }
 
+impl From<async_ssh2_tokio::Error> for AppError {
+    fn from(error: async_ssh2_tokio::Error) -> Self {
+        AppError::Network(format!("SSH error: {}", error))
+    }
+}

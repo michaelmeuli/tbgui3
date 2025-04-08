@@ -6,7 +6,6 @@ use cosmic::widget::menu::action::MenuAction;
 use cosmic::widget::{self, nav_bar};
 use serde::{Deserialize, Serialize};
 
-
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub enum NavPage {
     RunTbProfiler,
