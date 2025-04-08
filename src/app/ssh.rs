@@ -37,10 +37,9 @@ pub async fn create_client(config: &TbguiConfig) -> Result<Client, AppError> {
 }
 
 pub async fn get_raw_reads(client: &Client, config: &TbguiConfig) -> Result<RemoteState, AppError> {
-    let remote_raw_dir = config
-        .remote_raw_dir
-        .as_deref()
-        .ok_or_else(|| AppError::Network("Remote raw directory is not set in the configuration".to_string()))?;
+    let remote_raw_dir = config.remote_raw_dir.as_deref().ok_or_else(|| {
+        AppError::Network("Remote rawreads directory is not set in the configuration".to_string())
+    })?;
 
     check_if_dir_exists(client, remote_raw_dir).await?;
 
@@ -57,37 +56,39 @@ pub async fn get_raw_reads(client: &Client, config: &TbguiConfig) -> Result<Remo
     Ok(RemoteState { items: tasks })
 }
 
-
 pub async fn run_tbprofiler(
     client: &Client,
     items_checked: usize,
     samples: String,
     config: &TbguiConfig,
-) -> Result<String, async_ssh2_tokio::Error> {
+) -> Result<String, AppError> {
     if items_checked == 0 {
-        return Err(async_ssh2_tokio::Error::from(std::io::Error::new(
-            std::io::ErrorKind::InvalidInput,
-            "Cannot run tbprofiler with zero items checked",
-        )));
+        return Err(AppError::Network(
+            "Cannot run tbprofiler with zero items checked".to_string(),
+        ));
     }
     let command_run_tbprofiler = format!(
         "sbatch --array 0-{} {} \"{}\" {} {} {}",
         items_checked - 1,
-        config.tb_profiler_script.as_str(),
+        config.tb_profiler_script.as_deref().ok_or_else(|| {
+            AppError::Network("tb_profiler_script is not set in the configuration".to_string())
+        })?,
         samples,
-        config.remote_raw_dir.as_str(),
-        config.remote_out_dir.as_str(),
-        config.user_template_remote.as_str(),
+        config.remote_raw_dir.as_deref().ok_or_else(|| {
+            AppError::Network(
+                "Remote rawreads directory is not set in the configuration".to_string(),
+            )
+        })?,
+        config.remote_out_dir.as_deref().ok_or_else(|| {
+            AppError::Network("Remote out directory is not set in the configuration".to_string())
+        })?,
+        config.user_template_remote.as_deref().ok_or_else(|| {
+            AppError::Network("Default template remote is not set in the configuration".to_string())
+        })?,
     );
     let commandexecutedresult_run_tbprofiler = client.execute(&command_run_tbprofiler).await?;
     if commandexecutedresult_run_tbprofiler.exit_status != 0 {
-        return Err(async_ssh2_tokio::Error::from(std::io::Error::new(
-            std::io::ErrorKind::Other,
-            format!(
-                "Failed to run tbprofiler: {:?}",
-                commandexecutedresult_run_tbprofiler
-            ),
-        )));
+        return Err(AppError::Network("Failed to run tbprofiler".to_string()));
     }
     Ok(commandexecutedresult_run_tbprofiler.stdout)
 }

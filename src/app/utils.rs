@@ -72,12 +72,9 @@ pub fn create_tasks(reads: Vec<String>) -> Vec<Item> {
     tasks
 }
 
-pub async fn check_if_dir_exists(
-    client: &Client,
-    remote_raw_dir: &str,
-) -> Result<(), AppError> {
+pub async fn check_if_dir_exists(client: &Client, remote_raw_dir: &str) -> Result<(), AppError> {
     let command = format!("test -d {} && echo 'exists'", remote_raw_dir);
-    
+
     let result = client.execute(&command).await.map_err(|e| {
         let msg = format!("Failed to check if remote directory exists: {:?}", e);
         log_error(&msg);
