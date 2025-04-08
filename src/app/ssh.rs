@@ -153,16 +153,19 @@ pub async fn download_results(client: &Client, config: &TbguiConfig) -> Result<(
 pub async fn delete_results(
     client: &Client,
     config: &TbguiConfig,
-) -> Result<(), async_ssh2_tokio::Error> {
-    let command_checkdir = format!("ls {}", config.remote_out_dir.as_str());
+) -> Result<(), AppError> {
+    let remote_out_dir = config.remote_out_dir.as_deref().ok_or_else(|| {
+        AppError::Network("Remote out directory is not set in the configuration".to_string())
+    })?;
+    let command_checkdir = format!("ls {}", remote_out_dir);
     let commandexecutedresult_checkdir = client.execute(&command_checkdir).await?;
     if commandexecutedresult_checkdir.exit_status != 0 {
-        return Err(async_ssh2_tokio::Error::from(std::io::Error::new(
-            std::io::ErrorKind::NotFound,
-            format!("No such directory: {:?}", config.remote_out_dir),
+        return Err(AppError::Network(format!(
+            "No such remote directory: {:?}",
+            config.remote_out_dir
         )));
     }
-    let command_rm = format!("rm -rf {}", config.remote_out_dir.as_str());
+    let command_rm = format!("rm -rf {}", remote_out_dir);
     let commandexecutedresult_rm = client.execute(&command_rm).await?;
     if commandexecutedresult_rm.exit_status != 0 {
         println!(
