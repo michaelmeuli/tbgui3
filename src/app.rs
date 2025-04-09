@@ -16,6 +16,8 @@ use futures_util::SinkExt;
 use ssh::create_client;
 use std::collections::{HashMap, VecDeque};
 use types::{AppError, DialogPage};
+use crate::model::sample::RemoteState;
+use crate::model::sample::Item;
 
 const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
 
@@ -33,6 +35,7 @@ pub struct App {
     context_page: ContextPage,
     nav_model: nav_bar::Model,
     client: Option<Client>,
+    items: Vec<Item>,
     key_binds: HashMap<KeyBind, Action>,
     config: TbguiConfig,
     app_themes: Vec<String>,
@@ -43,6 +46,8 @@ pub struct App {
 #[derive(Debug, Clone)]
 pub enum Message {
     ClientInitialized(Client),
+    LoadRemoteState,
+    LoadedRemoteState(RemoteState),
     RunTbProfiler,
     OpenRepositoryUrl,
     SubscriptionChannel,
@@ -87,6 +92,7 @@ impl cosmic::Application for App {
             context_page: ContextPage::default(),
             nav_model: get_nav_model(&flags),
             client: None,
+            items: Vec::new(),
             key_binds: HashMap::new(),
             // Optional configuration file for an application.
             config: cosmic_config::Config::new(Self::APP_ID, TbguiConfig::VERSION)
@@ -247,7 +253,28 @@ impl cosmic::Application for App {
         match message {
             Message::ClientInitialized(client) => {
                 self.client = Some(client);
+                cosmic::Action::App(Message::LoadRemoteState);
             }
+            Message::LoadRemoteState => {
+                if let Some(client) = &self.client {
+                    let config = self.config.clone();
+                    let command = Task::perform(ssh::get_raw_reads(client, &config), |data| match data {
+                        Ok(remote_state) => cosmic::Action::App(Message::LoadedRemoteState(remote_state)),
+                        Err(err) => cosmic::Action::App(Message::Error(AppError::Network(err.to_string()))),
+                    });
+                    commands.push(command);
+                }
+            }
+            Message::LoadedRemoteState(result) => match result {
+                Ok(remote_state) => {
+                    // Handle the loaded remote state
+                    // For example, update the UI or store the state
+                }
+                Err(err) => {
+                    eprintln!("Error loading remote state: {}", err);
+                    self.dialog_pages.push_back(DialogPage::Info(err));
+                }
+            },
             Message::RunTbProfiler => {
                 //TODO: fetch raw sequences first
             }
