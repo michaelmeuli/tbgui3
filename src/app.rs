@@ -1,8 +1,8 @@
 use crate::fl;
 use crate::views::nav::{get_nav_model, Action, ContextPage, NavPage};
-use async_ssh2_tokio::client::{self, Client};
+use async_ssh2_tokio::client::Client;
+use config::AppTheme;
 use config::TbguiConfig;
-use config::{AppError, AppTheme};
 use cosmic::app::context_drawer;
 use cosmic::app::Core;
 use cosmic::cosmic_config::{self, CosmicConfigEntry};
@@ -15,6 +15,7 @@ use cosmic::{cosmic_theme, theme};
 use futures_util::SinkExt;
 use ssh::create_client;
 use std::collections::{HashMap, VecDeque};
+use types::{AppError, DialogPage};
 
 const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
 
@@ -24,6 +25,7 @@ pub mod localize;
 pub mod menu;
 pub mod settings;
 pub mod ssh;
+pub mod types;
 pub mod utils;
 
 pub struct App {
@@ -58,11 +60,6 @@ pub enum Message {
 pub struct Flags {
     pub config_handler: Option<cosmic_config::Config>,
     pub config: TbguiConfig,
-}
-
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub enum DialogPage {
-    Info(AppError),
 }
 
 impl cosmic::Application for App {
@@ -116,10 +113,8 @@ impl cosmic::Application for App {
                 let client = create_client(&config_clone).await;
                 client
             },
-            |client| match client { 
-                Ok(client) => {
-                    cosmic::Action::App(Message::ClientInitialized(client))
-                },
+            |client| match client {
+                Ok(client) => cosmic::Action::App(Message::ClientInitialized(client)),
                 Err(err) => cosmic::Action::App(Message::Error(err)),
             },
         );

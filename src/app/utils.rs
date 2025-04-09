@@ -1,4 +1,5 @@
-use super::config::{AppError, TbguiConfig};
+use super::config::TbguiConfig;
+use super::types::AppError;
 use crate::model::sample::Item;
 use crate::RESULT_DIR_LOCAL;
 use async_ssh2_tokio::client::Client;

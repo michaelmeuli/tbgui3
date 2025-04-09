@@ -1,4 +1,5 @@
-use super::config::{AppError, TbguiConfig};
+use super::config::TbguiConfig;
+use super::types::AppError;
 use super::utils::*;
 use crate::model::sample::RemoteState;
 use crate::{DEFAULT_TEMPLATE_FILENAME_LOCAL, RESULT_DIR_LOCAL};
@@ -110,13 +111,16 @@ pub async fn download_results(client: &Client, config: &TbguiConfig) -> Result<(
         .await
         .map_err(|e| AppError::Network(format!("Failed to start SFTP session: {e:?}")))?;
 
-    println!("Downloading results from remote directory: {:?}", remote_dir);
+    println!(
+        "Downloading results from remote directory: {:?}",
+        remote_dir
+    );
 
     let default_local_dir = UserDirs::new().unwrap().home_dir().join(RESULT_DIR_LOCAL);
     if !default_local_dir.exists() {
-        create_dir_all(&default_local_dir)
-            .await
-            .map_err(|e| AppError::IO(format!("Failed to create default local directory: {e:?}")))?;
+        create_dir_all(&default_local_dir).await.map_err(|e| {
+            AppError::IO(format!("Failed to create default local directory: {e:?}"))
+        })?;
     }
     let local_dir = FileDialog::new()
         .set_title("Select directory to download results")
@@ -149,11 +153,7 @@ pub async fn download_results(client: &Client, config: &TbguiConfig) -> Result<(
     Ok(())
 }
 
-
-pub async fn delete_results(
-    client: &Client,
-    config: &TbguiConfig,
-) -> Result<(), AppError> {
+pub async fn delete_results(client: &Client, config: &TbguiConfig) -> Result<(), AppError> {
     let remote_out_dir = config.remote_out_dir.as_deref().ok_or_else(|| {
         AppError::Network("Remote out directory is not set in the configuration".to_string())
     })?;
@@ -237,10 +237,7 @@ pub async fn download_default_template(
     Ok(())
 }
 
-pub async fn upload_user_template(
-    client: &Client,
-    config: &TbguiConfig,
-) -> Result<(), AppError> {
+pub async fn upload_user_template(client: &Client, config: &TbguiConfig) -> Result<(), AppError> {
     let remote_file_path = config.user_template_remote.as_deref().ok_or_else(|| {
         AppError::Network("User template remote is not set in the configuration".to_string())
     })?;
