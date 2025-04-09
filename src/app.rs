@@ -41,6 +41,7 @@ pub struct App {
 #[derive(Debug, Clone)]
 pub enum Message {
     ClientInitialized(Client),
+    RunTbProfiler,
     OpenRepositoryUrl,
     SubscriptionChannel,
     ToggleContextPage(ContextPage),
@@ -249,6 +250,12 @@ impl cosmic::Application for App {
     fn update(&mut self, message: Self::Message) -> Task<cosmic::Action<Self::Message>> {
         let mut commands = vec![];
         match message {
+            Message::ClientInitialized(client) => {
+                self.client = Some(client);
+            }
+            Message::RunTbProfiler => {
+                //TODO: fetch raw sequences first
+            }
             Message::OpenRepositoryUrl => {
                 _ = open::that_detached(REPOSITORY);
             }
@@ -259,10 +266,8 @@ impl cosmic::Application for App {
 
             Message::ToggleContextPage(context_page) => {
                 if self.context_page == context_page {
-                    // Close the context drawer if the toggled context page is the same.
                     self.core.window.show_context = !self.core.window.show_context;
                 } else {
-                    // Open the context drawer to display the requested context page.
                     self.context_page = context_page;
                     self.core.window.show_context = true;
                 }
@@ -299,9 +304,6 @@ impl cosmic::Application for App {
             }
             Message::DialogUpdate(dialog_page) => {
                 self.dialog_pages[0] = dialog_page;
-            }
-            Message::ClientInitialized(client) => {
-                self.client = Some(client);
             }
         }
         Task::none()

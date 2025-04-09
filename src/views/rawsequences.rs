@@ -19,7 +19,7 @@ where
 
         let mut run_controls = widget::row();
         run_controls = run_controls
-            .push(widget::button::standard("Run Profiler").on_press(Message::OpenRepositoryUrl));
+            .push(widget::button::standard("Run Profiler").on_press(Message::RunTbProfiler));
         let content = widget::column()
             .push(title)
             .push(widget::vertical_space().height(20))
