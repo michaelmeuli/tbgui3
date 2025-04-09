@@ -1,6 +1,8 @@
 use crate::fl;
+use crate::model::sample::Item;
+use crate::model::sample::RemoteState;
 use crate::views::nav::{get_nav_model, Action, ContextPage, NavPage};
-use async_ssh2_tokio::client::Client;
+use async_ssh2_tokio::client::{self, Client};
 use config::AppTheme;
 use config::TbguiConfig;
 use cosmic::app::context_drawer;
@@ -16,8 +18,6 @@ use futures_util::SinkExt;
 use ssh::create_client;
 use std::collections::{HashMap, VecDeque};
 use types::{AppError, DialogPage};
-use crate::model::sample::RemoteState;
-use crate::model::sample::Item;
 
 const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
 
@@ -127,6 +127,10 @@ impl cosmic::Application for App {
         commands.push(command);
 
         app.core.nav_bar_set_toggled(false);
+
+        if app.items.is_empty() {
+            commands.push(app.update_rawreads_data().map(cosmic::Action::App));
+        }
 
         // Create a startup command that sets the window title.  //TODO?
         let command = app.update_title();
@@ -253,28 +257,14 @@ impl cosmic::Application for App {
         match message {
             Message::ClientInitialized(client) => {
                 self.client = Some(client);
-                cosmic::Action::App(Message::LoadRemoteState);
+                //cosmic::Action::App(Message::LoadRemoteState);
             }
             Message::LoadRemoteState => {
-                if let Some(client) = &self.client {
-                    let config = self.config.clone();
-                    let command = Task::perform(ssh::get_raw_reads(client, &config), |data| match data {
-                        Ok(remote_state) => cosmic::Action::App(Message::LoadedRemoteState(remote_state)),
-                        Err(err) => cosmic::Action::App(Message::Error(AppError::Network(err.to_string()))),
-                    });
-                    commands.push(command);
-                }
+                commands.push(self.update_rawreads_data());
             }
-            Message::LoadedRemoteState(result) => match result {
-                Ok(remote_state) => {
-                    // Handle the loaded remote state
-                    // For example, update the UI or store the state
-                }
-                Err(err) => {
-                    eprintln!("Error loading remote state: {}", err);
-                    self.dialog_pages.push_back(DialogPage::Info(err));
-                }
-            },
+            Message::LoadedRemoteState(result) => {
+                self.items = result.items;
+            }
             Message::RunTbProfiler => {
                 //TODO: fetch raw sequences first
             }
@@ -339,6 +329,22 @@ impl cosmic::Application for App {
 }
 
 impl App {
+    pub fn update_rawreads_data(&self) -> Task<Message> {
+        let client = self.client.clone();
+        let config = self.config.clone();
+        if let Some(client) = client {
+            Task::perform(
+                async move { Item::get_raw_reads(&client, &config).await },
+                |result| match result {
+                    Ok(remote_state) => Message::LoadedRemoteState(remote_state),
+                    Err(err) => Message::Error(AppError::Network(err.to_string())),
+                },
+            )
+        } else {
+            Task::none()
+        }
+    }
+
     pub fn update_title(&mut self) -> Task<cosmic::Action<Message>> {
         let mut window_title = fl!("app-title");
 

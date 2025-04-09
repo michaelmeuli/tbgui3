@@ -1,7 +1,6 @@
 use super::config::TbguiConfig;
 use super::types::AppError;
 use super::utils::*;
-use crate::model::sample::RemoteState;
 use crate::{DEFAULT_TEMPLATE_FILENAME_LOCAL, RESULT_DIR_LOCAL};
 use async_ssh2_tokio::client::{AuthMethod, Client, ServerCheckMethod};
 use directories_next::UserDirs; // TODO: Remove this dependency
@@ -34,26 +33,6 @@ pub async fn create_client(config: &TbguiConfig) -> Result<Client, AppError> {
     )
     .await?;
     Ok(client)
-}
-
-pub async fn get_raw_reads(client: &Client, config: &TbguiConfig) -> Result<RemoteState, AppError> {
-    let remote_raw_dir = config.remote_raw_dir.as_deref().ok_or_else(|| {
-        AppError::Network("Remote rawreads directory is not set in the configuration".to_string())
-    })?;
-
-    check_if_dir_exists(client, remote_raw_dir).await?;
-
-    let command = format!("ls {}", remote_raw_dir);
-    let result = client.execute(&command).await.map_err(|e| {
-        let msg = format!("Failed to list files in remote directory: {:?}", e);
-        log_error(&msg);
-        AppError::Network(msg)
-    })?;
-
-    let raw_reads: Vec<String> = result.stdout.lines().map(String::from).collect();
-    let tasks = create_tasks(raw_reads);
-
-    Ok(RemoteState { items: tasks })
 }
 
 pub async fn run_tbprofiler(
