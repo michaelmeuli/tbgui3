@@ -1,11 +1,12 @@
 use crate::app::config::TbguiConfig;
-use crate::app::types::{AppError, DialogPage};
-use crate::app::utils::{check_if_dir_exists, create_tasks, log_error};
-use async_ssh2_tokio::client::{AuthMethod, Client, ServerCheckMethod};
+use crate::app::types::AppError;
+use crate::app::utils::{check_if_dir_exists, log_error};
+use async_ssh2_tokio::client::Client;
 use cosmic::iced::Length;
-use cosmic::widget::{checkbox, text};
+use cosmic::widget::checkbox;
 use cosmic::Element;
 use uuid::Uuid;
+use std::collections::HashSet;
 
 #[derive(Debug, Clone)]
 pub struct Item {
@@ -83,4 +84,22 @@ impl Filter {
 #[derive(Debug, Clone)]
 pub struct RemoteState {
     pub items: Vec<Item>,
+}
+
+pub fn create_tasks(reads: Vec<String>) -> Vec<Item> {
+    let mut tasks = Vec::new();
+    let mut seen_samples = HashSet::new();
+
+    for file_name in reads {
+        if let Some((sample, _suffix)) = file_name.split_once('_') {
+            if seen_samples.insert(sample.to_string()) {
+                tasks.push(Item {
+                    id: Uuid::new_v4(),
+                    sample: sample.to_string(),
+                    is_checked: false,
+                });
+            }
+        }
+    }
+    tasks
 }

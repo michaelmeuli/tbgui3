@@ -55,24 +55,6 @@ pub async fn check_if_running(client: &Client, config: &TbguiConfig) -> Result<b
     Ok(running)
 }
 
-pub fn create_tasks(reads: Vec<String>) -> Vec<Item> {
-    let mut tasks = Vec::new();
-    let mut seen_samples = HashSet::new();
-
-    for file_name in reads {
-        if let Some((sample, _suffix)) = file_name.split_once('_') {
-            if seen_samples.insert(sample.to_string()) {
-                tasks.push(Item {
-                    id: Uuid::new_v4(),
-                    sample: sample.to_string(),
-                    is_checked: false,
-                });
-            }
-        }
-    }
-    tasks
-}
-
 pub async fn check_if_dir_exists(client: &Client, remote_raw_dir: &str) -> Result<(), AppError> {
     let command = format!("test -d {} && echo 'exists'", remote_raw_dir);
 
