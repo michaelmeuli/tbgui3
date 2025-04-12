@@ -1,6 +1,7 @@
 use crate::fl;
 use crate::model::sample::Item;
 use crate::model::sample::RemoteState;
+use crate::content::Content;
 use crate::views::nav::{get_nav_model, Action, ContextPage, NavPage};
 use async_ssh2_tokio::client::{self, Client};
 use config::AppTheme;
@@ -36,6 +37,7 @@ pub struct App {
     nav_model: nav_bar::Model,
     client: Option<Client>,
     items: Vec<Item>,
+    content: Content,
     key_binds: HashMap<KeyBind, Action>,
     config: TbguiConfig,
     app_themes: Vec<String>,
@@ -48,6 +50,7 @@ pub enum Message {
     ClientInitialized(Client),
     LoadRemoteState,
     LoadedRemoteState(RemoteState),
+    Content(content::Message),
     RunTbProfiler,
     OpenRepositoryUrl,
     SubscriptionChannel,
@@ -93,6 +96,7 @@ impl cosmic::Application for App {
             nav_model: get_nav_model(&flags),
             client: None,
             items: Vec::new(),
+            content: Content::new(),
             key_binds: HashMap::new(),
             // Optional configuration file for an application.
             config: cosmic_config::Config::new(Self::APP_ID, TbguiConfig::VERSION)
@@ -128,6 +132,8 @@ impl cosmic::Application for App {
 
         app.core.nav_bar_set_toggled(false);
 
+
+        // TODO: remove as replaced by content
         if app.items.is_empty() {
             commands.push(app.update_rawreads_data().map(cosmic::Action::App));
         }

@@ -1755,6 +1755,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "emojis"
+version = "0.6.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "99e1f1df1f181f2539bac8bf027d31ca5ffbf9e559e3f2d09413b9107b5c02f4"
+dependencies = [
+ "phf",
+]
+
+[[package]]
 name = "endi"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5718,6 +5727,7 @@ version = "0.1.0"
 dependencies = [
  "async-ssh2-tokio",
  "directories-next",
+ "emojis",
  "futures-util",
  "i18n-embed",
  "i18n-embed-fl",
@@ -5728,6 +5738,7 @@ dependencies = [
  "russh-sftp",
  "rust-embed",
  "serde",
+ "slotmap",
  "tokio",
  "uuid",
  "vergen",

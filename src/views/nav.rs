@@ -1,4 +1,4 @@
-use crate::app::icon_cache::icon_cache_get;
+use crate::app::icon_cache::get_icon;
 use crate::app::Flags;
 use crate::app::Message;
 use crate::fl;
@@ -35,10 +35,10 @@ impl NavPage {
 
     pub fn icon(&self) -> widget::icon::Icon {
         match self {
-            Self::RunTbProfiler => icon_cache_get("play", 16),
-            Self::DownloadResults => icon_cache_get("download", 16),
-            Self::DeleteResults => icon_cache_get("delete", 16),
-            Self::Settings => icon_cache_get("settings", 16),
+            Self::RunTbProfiler => get_icon("play", 16),
+            Self::DownloadResults => get_icon("download", 16),
+            Self::DeleteResults => get_icon("delete", 16),
+            Self::Settings => get_icon("settings", 16),
         }
     }
 }

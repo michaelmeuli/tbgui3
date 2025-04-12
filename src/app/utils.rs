@@ -5,7 +5,6 @@ use crate::RESULT_DIR_LOCAL;
 use async_ssh2_tokio::client::Client;
 use directories_next::UserDirs;
 use russh_sftp::{client::SftpSession, protocol::OpenFlags};
-use std::collections::HashSet;
 use std::fs::{self, OpenOptions};
 use std::io::Write;
 use std::path::Path;

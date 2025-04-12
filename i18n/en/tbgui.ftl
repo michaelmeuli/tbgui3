@@ -18,3 +18,9 @@ settings = Settings
 dark = Dark
 light = Light
 system = Match desktop
+
+# Empty
+no-tasks = No tasks
+no-tasks-suggestion = Try adding a task with the text field below
+no-list-selected = No list selected
+no-list-suggestion = Create or select a new list to get started
