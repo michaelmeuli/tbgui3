@@ -1,45 +1,32 @@
 use cosmic::{
     iced::{
-        alignment::{Horizontal, Vertical}, task::Handle, Alignment, Length, Subscription
+        alignment::{Horizontal, Vertical},
+        task::Handle,
+        Alignment, Length, Subscription,
     },
     iced_widget::row,
     theme, widget, Apply, Element,
 };
 
-
-use crate::model::sample::Item;
 use crate::app::icon_cache::get_icon;
-
-//use slotmap::{DefaultKey, SecondaryMap, SlotMap};
-use slotmap::{DefaultKey, SlotMap};
+use crate::model::sample::Item;
+use slotmap::{DefaultKey, SecondaryMap, SlotMap};
 
 use crate::{
     app::icon_cache,
-    model::{self, list::List},
     fl,
+    model::{self, list::List},
 };
 
-
-
 pub struct Content {
-    //tasks: SlotMap<DefaultKey, models::Task>,
-    items: SlotMap<DefaultKey, Item>
+    list: Option<List>,
+    items: SlotMap<DefaultKey, Item>,
+    task_input_ids: SecondaryMap<DefaultKey, widget::Id>,
 }
 
 #[derive(Debug, Clone)]
 pub enum Message {
-    AddTask,
-    Complete(DefaultKey, bool),
-    Delete(DefaultKey),
-    EditMode(DefaultKey, bool),
-    Export(Vec<Item>),
-    Input(String),
-    List(Option<List>),
-    Select(Item),
     SetItems(Vec<Item>),
-    TitleSubmit(DefaultKey),
-    TitleUpdate(DefaultKey, String),
-    UpdateTask(Item),
 }
 
 pub enum Task {
@@ -54,17 +41,15 @@ pub enum Task {
 
 impl Content {
     pub fn new() -> Self {
-        Self { 
-            items: SlotMap::new()
+        Self {
+            list: None,
+            items: SlotMap::new(),
+            task_input_ids: SecondaryMap::new(),
         }
     }
 
     fn list_header<'a>(&'a self, list: &'a List) -> Element<'a, Message> {
         let spacing = theme::active().cosmic().spacing;
-        let export_button = widget::button::icon(icon_cache::get_handle("share-symbolic", 18))
-            .class(cosmic::style::Button::Suggested)
-            .padding(spacing.space_xxs)
-            .on_press(Message::Export(self.items.values().cloned().collect()));
         let default_icon = emojis::get_by_shortcode("pencil").unwrap().to_string();
         let icon = list.icon.clone().unwrap_or(default_icon);
 
@@ -74,7 +59,6 @@ impl Content {
             .padding([spacing.space_none, spacing.space_xxs])
             .push(widget::text(icon).size(spacing.space_m))
             .push(widget::text::title3(&list.name).width(Length::Fill))
-            .push(export_button)
             .into()
     }
 
@@ -90,7 +74,6 @@ impl Content {
                 .push(self.list_header(list))
                 .into()
         }
-
     }
 
     pub fn empty<'a>(&'a self, list: &'a List) -> Element<'a, Message> {
@@ -117,6 +100,17 @@ impl Content {
             .into()
     }
 
-
-
+    pub fn update(&mut self, message: Message) -> Vec<Task> {
+        let mut tasks = Vec::new();
+        match message {
+            Message::SetItems(tasks) => {
+                self.items.clear();
+                for task in tasks {
+                    let id = self.items.insert(task);
+                    self.task_input_ids.insert(id, widget::Id::unique());
+                }
+            }
+        }
+        tasks
+    }
 }

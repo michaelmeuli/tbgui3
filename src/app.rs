@@ -1,8 +1,9 @@
 use crate::fl;
 use crate::model::sample::Item;
 use crate::model::sample::RemoteState;
-use crate::content::Content;
+use crate::content::{self, Content};
 use crate::views::nav::{get_nav_model, Action, ContextPage, NavPage};
+use crate::model::list::List;
 use async_ssh2_tokio::client::{self, Client};
 use config::AppTheme;
 use config::TbguiConfig;
@@ -270,6 +271,12 @@ impl cosmic::Application for App {
             }
             Message::LoadedRemoteState(result) => {
                 self.items = result.items;
+            }
+            Message::Content(message) => {
+                let content_items = self.content.update(message);
+                let list = List::new("tbprofiler_paired_reads");
+                let content_command = self.content.update(content_message);
+                commands.push(content_command.map(cosmic::Action::App));
             }
             Message::RunTbProfiler => {
                 //TODO: fetch raw sequences first
