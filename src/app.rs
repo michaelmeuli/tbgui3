@@ -278,19 +278,7 @@ impl cosmic::Application for App {
                 for content_item in content_items {
                     match content_item {
                         content::Task::Get(list_id) => {
-                            commands.push(Task::perform(
-                                todo::get_raw_reads(
-                                    self.client.as_ref().unwrap(),
-                                    &self.config,
-                                ),
-                                |result| match result {
-                                    Ok(data) => cosmic::Action::App(Message::Content(
-                                        content::Message::SetItems(data),
-                                    )),
-                                    Err(_) => cosmic::Action::None,
-                                },
-                            ));
-                            //commands.push(self.update_rawreads_data());
+                            commands.push(self.update_rawreads_data().map(cosmic::Action::App));
                         }
                     }
                 }
