@@ -1,10 +1,9 @@
+use crate::content::{self, Content};
 use crate::fl;
 use crate::model::sample::Item;
 use crate::model::sample::RemoteState;
-use crate::content::{self, Content};
 use crate::views::nav::{get_nav_model, Action, ContextPage, NavPage};
-use crate::model::list::List;
-use async_ssh2_tokio::client::{self, Client};
+use async_ssh2_tokio::client::Client;
 use config::AppTheme;
 use config::TbguiConfig;
 use cosmic::app::context_drawer;
@@ -20,7 +19,6 @@ use futures_util::SinkExt;
 use ssh::create_client;
 use std::collections::{HashMap, VecDeque};
 use types::{AppError, DialogPage};
-use crate::todo;
 
 const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
 
@@ -133,7 +131,6 @@ impl cosmic::Application for App {
         commands.push(command);
 
         app.core.nav_bar_set_toggled(false);
-
 
         // TODO: remove as replaced by content
         if app.items.is_empty() {
@@ -348,6 +345,7 @@ impl cosmic::Application for App {
 }
 
 impl App {
+    // TODO: remove as replaced by content
     pub fn update_rawreads_data(&self) -> Task<Message> {
         let client = self.client.clone();
         let config = self.config.clone();
@@ -369,9 +367,9 @@ impl App {
         let config = self.config.clone();
         if let Some(client) = client {
             Task::perform(
-                async move { todo::get_paired_reads_as_items(&client, &config).await },
+                async move { Item::get_paired_reads_as_items(&client, &config).await },
                 |result| match result {
-                    Ok(data) => Message::Content(content::Message::SetItems(data)),   //.map(cosmic::Action::App)
+                    Ok(data) => Message::Content(content::Message::SetItems(data)), //.map(cosmic::Action::App)
                     Err(err) => Message::Error(AppError::Network(err.to_string())),
                 },
             )

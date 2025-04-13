@@ -4,10 +4,9 @@ use app::{
 };
 
 mod app;
+mod content;
 mod model;
 mod views;
-mod content;
-mod todo;
 
 const RESULT_DIR_LOCAL: &str = "tb-profiler-results";
 const DEFAULT_TEMPLATE_FILENAME_LOCAL: &str = "default_template.docx";

@@ -5,8 +5,8 @@ use async_ssh2_tokio::client::Client;
 use cosmic::iced::Length;
 use cosmic::widget::checkbox;
 use cosmic::Element;
-use uuid::Uuid;
 use std::collections::HashSet;
+use uuid::Uuid;
 
 #[derive(Debug, Clone)]
 pub struct Item {
@@ -60,6 +60,31 @@ impl Item {
         let tasks = create_tasks(raw_reads);
 
         Ok(RemoteState { items: tasks })
+    }
+
+    pub async fn get_paired_reads_as_items(
+        client: &Client,
+        config: &TbguiConfig,
+    ) -> Result<Vec<Item>, AppError> {
+        let remote_raw_dir = config.remote_raw_dir.as_deref().ok_or_else(|| {
+            AppError::Network(
+                "Remote rawreads directory is not set in the configuration".to_string(),
+            )
+        })?;
+
+        check_if_dir_exists(client, remote_raw_dir).await?;
+
+        let command = format!("ls {}", remote_raw_dir);
+        let result = client.execute(&command).await.map_err(|e| {
+            let msg = format!("Failed to list files in remote directory: {:?}", e);
+            log_error(&msg);
+            AppError::Network(msg)
+        })?;
+
+        let raw_reads: Vec<String> = result.stdout.lines().map(String::from).collect();
+        let tasks = create_tasks(raw_reads);
+
+        Ok(tasks)
     }
 }
 

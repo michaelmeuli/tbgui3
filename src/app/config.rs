@@ -1,11 +1,11 @@
 use cosmic::{
-    cosmic_config::{self, cosmic_config_derive::CosmicConfigEntry, Config, CosmicConfigEntry}, theme, Application
+    cosmic_config::{self, cosmic_config_derive::CosmicConfigEntry, Config, CosmicConfigEntry},
+    theme, Application,
 };
 use serde::{Deserialize, Serialize};
 
 use super::{App, NavPage};
 use crate::model::list::List;
-
 
 pub const CONFIG_VERSION: u64 = 1;
 
@@ -41,7 +41,7 @@ pub struct TbguiConfig {
     pub user_template_remote: Option<String>,
     pub default_page: NavPage,
     pub app_theme: AppTheme,
-    pub list: List, 
+    pub list: List,
 }
 
 impl Default for TbguiConfig {
