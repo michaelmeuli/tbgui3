@@ -26,17 +26,12 @@ pub struct Content {
 
 #[derive(Debug, Clone)]
 pub enum Message {
+    List(Option<List>),
     SetItems(Vec<Item>),
 }
 
 pub enum Task {
-    Focus(widget::Id),
     Get(String),
-    Display(Item),
-    Update(Item),
-    Delete(String),
-    Create(Item),
-    Export(Vec<Item>),
 }
 
 impl Content {
@@ -103,6 +98,20 @@ impl Content {
     pub fn update(&mut self, message: Message) -> Vec<Task> {
         let mut tasks = Vec::new();
         match message {
+            Message::List(list) => {
+                match (&self.list, &list) {
+                    (Some(current), Some(list)) => {
+                        if current.id != list.id {
+                            tasks.push(Task::Get(list.id.clone()));
+                        }
+                    }
+                    (None, Some(list)) => {
+                        tasks.push(Task::Get(list.id.clone()));
+                    }
+                    _ => {}
+                }
+                self.list.clone_from(&list);
+            }
             Message::SetItems(tasks) => {
                 self.items.clear();
                 for task in tasks {

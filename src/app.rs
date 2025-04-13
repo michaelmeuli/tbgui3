@@ -20,6 +20,7 @@ use futures_util::SinkExt;
 use ssh::create_client;
 use std::collections::{HashMap, VecDeque};
 use types::{AppError, DialogPage};
+use crate::todo;
 
 const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
 
@@ -267,16 +268,32 @@ impl cosmic::Application for App {
                 //cosmic::Action::App(Message::LoadRemoteState);
             }
             Message::LoadRemoteState => {
-                commands.push(self.update_rawreads_data());
+                commands.push(self.update_rawreads_data().map(cosmic::Action::App));
             }
             Message::LoadedRemoteState(result) => {
                 self.items = result.items;
             }
             Message::Content(message) => {
                 let content_items = self.content.update(message);
-                let list = List::new("tbprofiler_paired_reads");
-                let content_command = self.content.update(content_message);
-                commands.push(content_command.map(cosmic::Action::App));
+                for content_item in content_items {
+                    match content_item {
+                        content::Task::Get(list_id) => {
+                            commands.push(Task::perform(
+                                todo::get_raw_reads(
+                                    self.client.as_ref().unwrap(),
+                                    &self.config,
+                                ),
+                                |result| match result {
+                                    Ok(data) => cosmic::Action::App(Message::Content(
+                                        content::Message::SetItems(data),
+                                    )),
+                                    Err(_) => cosmic::Action::None,
+                                },
+                            ));
+                            //commands.push(self.update_rawreads_data());
+                        }
+                    }
+                }
             }
             Message::RunTbProfiler => {
                 //TODO: fetch raw sequences first
@@ -310,8 +327,8 @@ impl cosmic::Application for App {
             },
             Message::AppTheme(theme) => {
                 self.config.app_theme = theme;
-                commands.push(self.save_config());
-                commands.push(self.save_theme());
+                commands.push(self.save_config().map(cosmic::Action::App));
+                commands.push(self.save_theme().map(cosmic::Action::App));
             }
             Message::Error(err) => {
                 eprintln!("Error: {}", err);
@@ -322,7 +339,7 @@ impl cosmic::Application for App {
                 let command = Task::none();
 
                 commands.push(command);
-                commands.push(self.save_config());
+                commands.push(self.save_config().map(cosmic::Action::App));
             }
             Message::DialogCancel => {
                 self.dialog_pages.pop_front();
