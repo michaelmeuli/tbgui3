@@ -278,7 +278,8 @@ impl cosmic::Application for App {
                 for content_item in content_items {
                     match content_item {
                         content::Task::Get(list_id) => {
-                            commands.push(self.update_rawreads_data().map(cosmic::Action::App));
+                            commands.push(self.get_rawreads_items().map(cosmic::Action::App));
+                            //commands.push(self.update_rawreads_data().map(cosmic::Action::App));
                         }
                     }
                 }
@@ -355,6 +356,22 @@ impl App {
                 async move { Item::get_raw_reads(&client, &config).await },
                 |result| match result {
                     Ok(remote_state) => Message::LoadedRemoteState(remote_state),
+                    Err(err) => Message::Error(AppError::Network(err.to_string())),
+                },
+            )
+        } else {
+            Task::none()
+        }
+    }
+
+    pub fn get_rawreads_items(&self) -> Task<Message> {
+        let client = self.client.clone();
+        let config = self.config.clone();
+        if let Some(client) = client {
+            Task::perform(
+                async move { todo::get_raw_reads(&client, &config).await },
+                |result| match result {
+                    Ok(data) => Message::Content(content::Message::SetItems(data)),   //.map(cosmic::Action::App)
                     Err(err) => Message::Error(AppError::Network(err.to_string())),
                 },
             )
