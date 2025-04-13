@@ -122,4 +122,36 @@ impl Content {
         }
         tasks
     }
+
+    pub fn view(&self) -> Element<Message> {
+        let spacing = theme::active().cosmic().spacing;
+
+        let Some(ref list) = self.list else {
+            return widget::container(
+                widget::column::with_children(vec![
+                    icon_cache::get_icon("applications-office-symbolic", 56).into(),
+                    widget::text::title1(fl!("no-list-selected")).into(),
+                    widget::text(fl!("no-list-suggestion")).into(),
+                ])
+                .spacing(10)
+                .align_x(Alignment::Center),
+            )
+            .align_y(Vertical::Center)
+            .align_x(Horizontal::Center)
+            .height(Length::Fill)
+            .width(Length::Fill)
+            .into();
+        };
+
+        widget::column::with_capacity(1)
+            .push(self.list_view(list))
+            .spacing(spacing.space_xxs)
+            .max_width(800.)
+            .apply(widget::container)
+            .height(Length::Fill)
+            .width(Length::Fill)
+            .center(Length::Fill)
+            .into()
+    }
+
 }

@@ -208,7 +208,7 @@ impl cosmic::Application for App {
     fn view(&self) -> Element<Self::Message> {
         let page_view = match self.nav_model.active_data::<NavPage>() {
             Some(NavPage::RunTbProfiler) => self.view_raw_sequences(),
-            Some(NavPage::DownloadResults) => self.view_raw_sequences(),
+            Some(NavPage::DownloadResults) => self.content.view().map(Message::Content),
             Some(NavPage::DeleteResults) => self.view_raw_sequences(),
             Some(NavPage::Settings) => self.view_settings(),
             None => cosmic::widget::text("Unkown page selected.").into(),
