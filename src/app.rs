@@ -262,10 +262,12 @@ impl cosmic::Application for App {
         match message {
             Message::ClientInitialized(client) => {
                 self.client = Some(client);
+                commands.push(self.get_rawreads_items().map(cosmic::Action::App));
                 //cosmic::Action::App(Message::LoadRemoteState);
             }
             Message::LoadRemoteState => {
                 commands.push(self.update_rawreads_data().map(cosmic::Action::App));
+                
             }
             Message::LoadedRemoteState(result) => {
                 self.items = result.items;
@@ -363,17 +365,22 @@ impl App {
     }
 
     pub fn get_rawreads_items(&self) -> Task<Message> {
+        println!("get_rawreads_items");
         let client = self.client.clone();
         let config = self.config.clone();
         if let Some(client) = client {
             Task::perform(
                 async move { Item::get_paired_reads_as_items(&client, &config).await },
                 |result| match result {
-                    Ok(data) => Message::Content(content::Message::SetItems(data)), //.map(cosmic::Action::App)
+                    Ok(data) => {
+                        println!("get_rawreads_items: {:?}", data);
+                        Message::Content(content::Message::SetItems(data))
+                    } //.map(cosmic::Action::App)
                     Err(err) => Message::Error(AppError::Network(err.to_string())),
                 },
             )
         } else {
+            println!("get_rawreads_items: no client");
             Task::none()
         }
     }

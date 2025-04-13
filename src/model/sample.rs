@@ -66,6 +66,7 @@ impl Item {
         client: &Client,
         config: &TbguiConfig,
     ) -> Result<Vec<Item>, AppError> {
+        println!("Getting paired reads as items");
         let remote_raw_dir = config.remote_raw_dir.as_deref().ok_or_else(|| {
             AppError::Network(
                 "Remote rawreads directory is not set in the configuration".to_string(),
@@ -83,6 +84,7 @@ impl Item {
 
         let raw_reads: Vec<String> = result.stdout.lines().map(String::from).collect();
         let tasks = create_tasks(raw_reads);
+        println!("Tasks: {:?}", tasks);
 
         Ok(tasks)
     }
