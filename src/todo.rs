@@ -20,7 +20,7 @@ pub async fn create_list(list: List, config: &mut TbguiConfig) -> Result<List, A
 //     Ok(vec![])
 // }
 
-pub async fn get_raw_reads(
+pub async fn get_paired_reads_as_items(
     client: &Client,
     config: &TbguiConfig,
 ) -> Result<Vec<Item>, AppError> {

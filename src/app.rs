@@ -369,7 +369,7 @@ impl App {
         let config = self.config.clone();
         if let Some(client) = client {
             Task::perform(
-                async move { todo::get_raw_reads(&client, &config).await },
+                async move { todo::get_paired_reads_as_items(&client, &config).await },
                 |result| match result {
                     Ok(data) => Message::Content(content::Message::SetItems(data)),   //.map(cosmic::Action::App)
                     Err(err) => Message::Error(AppError::Network(err.to_string())),
