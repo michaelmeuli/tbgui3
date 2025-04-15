@@ -47,7 +47,7 @@ pub struct App {
 
 #[derive(Debug, Clone)]
 pub enum Message {
-    ClientInitialized(Client),
+    ClientInitialized(Result<Client, AppError>),
     LoadRemoteState,
     LoadedRemoteState(RemoteState),
     Content(content::Message),
@@ -124,8 +124,8 @@ impl cosmic::Application for App {
                 client
             },
             |client| match client {
-                Ok(client) => cosmic::Action::App(Message::ClientInitialized(client)),
-                Err(err) => cosmic::Action::App(Message::Error(err)),
+                Ok(client) => cosmic::Action::App(Message::ClientInitialized(Ok(client))),
+                Err(err) => cosmic::Action::App(Message::ClientInitialized(Err(AppError::Network(err.to_string())))),
             },
         );
         commands.push(command);
@@ -133,9 +133,9 @@ impl cosmic::Application for App {
         app.core.nav_bar_set_toggled(false);
 
         // TODO: remove as replaced by content
-        if app.items.is_empty() {
-            commands.push(app.update_rawreads_data().map(cosmic::Action::App));
-        }
+        // if app.items.is_empty() {
+        //     commands.push(app.update_rawreads_data().map(cosmic::Action::App));
+        // }
 
         // Create a startup command that sets the window title.  //TODO?
         let command = app.update_title();
@@ -261,8 +261,10 @@ impl cosmic::Application for App {
         let mut commands = vec![];
         match message {
             Message::ClientInitialized(client) => {
-                self.client = Some(client);
-                commands.push(self.get_rawreads_items().map(cosmic::Action::App));
+
+                //commands.push(app.update_rawreads_data().map(cosmic::Action::App));
+                //self.client = Some(client);
+                //commands.push(self.get_rawreads_items().map(cosmic::Action::App));
                 //cosmic::Action::App(Message::LoadRemoteState);
             }
             Message::LoadRemoteState => {
