@@ -12,10 +12,7 @@ use crate::app::icon_cache::get_icon;
 use crate::model::sample::Item;
 use slotmap::{DefaultKey, SecondaryMap, SlotMap};
 
-use crate::{
-    app::icon_cache,
-    fl,
-};
+use crate::{app::icon_cache, fl};
 
 pub struct Content {
     items: SlotMap<DefaultKey, Item>,
@@ -131,5 +128,4 @@ impl Content {
             .center(Length::Fill)
             .into()
     }
-
 }

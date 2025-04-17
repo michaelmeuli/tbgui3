@@ -10,14 +10,8 @@ use cosmic::widget::{button, text_input};
 use cosmic::iced::Alignment;
 use cosmic::Apply;
 
-
-use crate::{
-    app::icon_cache,
-    fl,
-};
 use crate::app::icon_cache::get_icon;
-
-
+use crate::{app::icon_cache, fl};
 
 impl App
 where
@@ -107,5 +101,4 @@ where
             .push(container)
             .into()
     }
-
 }

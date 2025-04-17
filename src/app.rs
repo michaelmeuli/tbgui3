@@ -4,7 +4,6 @@ use crate::model::sample::Item;
 use crate::model::sample::RemoteState;
 use crate::views::nav::{get_nav_model, Action, ContextPage, NavPage};
 use async_ssh2_tokio::client::Client;
-use config::AppTheme;
 use config::TbguiConfig;
 use cosmic::app::context_drawer;
 use cosmic::app::Core;
@@ -40,16 +39,15 @@ pub struct App {
     content: Content,
     key_binds: HashMap<KeyBind, Action>,
     config: TbguiConfig,
-    app_themes: Vec<String>,
     config_handler: Option<cosmic_config::Config>,
     dialog_pages: VecDeque<DialogPage>,
 }
 
 #[derive(Debug, Clone)]
 pub enum Message {
-    ClientInitialized(Result<Client, AppError>),
     CreateClient,
     CreatedClient(Result<Client, AppError>),
+    CreatedClient2(Result<Client, AppError>),
     LoadRemoteState,
     LoadedRemoteState(RemoteState),
     Content(content::Message),
@@ -59,11 +57,8 @@ pub enum Message {
     ToggleContextPage(ContextPage),
     UpdateConfig(TbguiConfig),
     LaunchUrl(String),
-    AppTheme(AppTheme),
     Error(AppError),
-    DialogComplete((String, String)),
     DialogCancel,
-    DialogUpdate(DialogPage),
 }
 
 #[derive(Clone, Debug)]
@@ -89,7 +84,6 @@ impl cosmic::Application for App {
 
     fn init(core: cosmic::Core, flags: Self::Flags) -> (Self, Task<cosmic::Action<Self::Message>>) {
         let mut commands = vec![];
-        let app_themes = vec![fl!("light"), fl!("dark"), fl!("system")];
 
         // Construct the app model with the runtime's core.
         let mut app = App {
@@ -113,24 +107,9 @@ impl cosmic::Application for App {
                     }
                 })
                 .unwrap_or_default(),
-            app_themes,
             config_handler: flags.config_handler,
             dialog_pages: VecDeque::new(),
         };
-
-        // Asynchronously initialize the client
-        let config_clone = app.config.clone();
-        let command = Task::perform(
-            async move {
-                let client = create_client(&config_clone).await;
-                client
-            },
-            |client| match client {
-                Ok(client) => cosmic::Action::App(Message::ClientInitialized(Ok(client))),
-                Err(err) => cosmic::Action::App(Message::ClientInitialized(Err(AppError::Network(err.to_string())))),
-            },
-        );
-        commands.push(command);
 
         println!("CreateClient");
         commands.push(Task::done(cosmic::Action::App(Message::CreateClient)));
@@ -297,7 +276,7 @@ impl cosmic::Application for App {
 
 
 
-            Message::ClientInitialized(client) => {
+            Message::CreatedClient2(client) => {
 
                 //commands.push(app.update_rawreads_data().map(cosmic::Action::App));
                 //self.client = Some(client);
@@ -368,27 +347,13 @@ impl cosmic::Application for App {
                     eprintln!("failed to open {url:?}: {err}");
                 }
             },
-            Message::AppTheme(theme) => {
-                self.config.app_theme = theme;
-                commands.push(self.save_config().map(cosmic::Action::App));
-                commands.push(self.save_theme().map(cosmic::Action::App));
-            }
             Message::Error(err) => {
                 eprintln!("Error: {}", err);
                 self.dialog_pages.pop_front();
                 self.dialog_pages.push_back(DialogPage::Info(err));
             }
-            Message::DialogComplete((city, key)) => {
-                let command = Task::none();
-
-                commands.push(command);
-                commands.push(self.save_config().map(cosmic::Action::App));
-            }
             Message::DialogCancel => {
                 self.dialog_pages.pop_front();
-            }
-            Message::DialogUpdate(dialog_page) => {
-                self.dialog_pages[0] = dialog_page;
             }
         }
         Task::batch(commands)
