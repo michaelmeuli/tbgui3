@@ -36,7 +36,7 @@ pub struct App {
     context_page: ContextPage,
     nav_model: nav_bar::Model,
     client: Option<Client>,
-    items: Vec<Item>,
+    pub items: Vec<Item>,
     content: Content,
     key_binds: HashMap<KeyBind, Action>,
     config: TbguiConfig,
@@ -48,6 +48,8 @@ pub struct App {
 #[derive(Debug, Clone)]
 pub enum Message {
     ClientInitialized(Result<Client, AppError>),
+    CreateClient,
+    CreatedClient(Result<Client, AppError>),
     LoadRemoteState,
     LoadedRemoteState(RemoteState),
     Content(content::Message),
@@ -130,6 +132,9 @@ impl cosmic::Application for App {
         );
         commands.push(command);
 
+        println!("CreateClient");
+        commands.push(Task::done(cosmic::Action::App(Message::CreateClient)));
+
         app.core.nav_bar_set_toggled(false);
 
         // TODO: remove as replaced by content
@@ -209,7 +214,7 @@ impl cosmic::Application for App {
         let page_view = match self.nav_model.active_data::<NavPage>() {
             Some(NavPage::RunTbProfiler) => self.view_raw_sequences(),
             Some(NavPage::DownloadResults) => self.content.view().map(Message::Content),
-            Some(NavPage::DeleteResults) => self.view_raw_sequences(),
+            Some(NavPage::DeleteResults) => self.view_raw_sequences2(),
             Some(NavPage::Settings) => self.view_settings(),
             None => cosmic::widget::text("Unkown page selected.").into(),
         };
@@ -260,6 +265,38 @@ impl cosmic::Application for App {
     fn update(&mut self, message: Self::Message) -> Task<cosmic::Action<Self::Message>> {
         let mut commands = vec![];
         match message {
+            Message::CreateClient => {
+                println!("CreateClient2");
+                let config = self.config.clone();
+                let command = Task::perform(
+                    async move { 
+                        println!("CreateClient3");
+                        create_client(&config).await 
+                    },
+                    |client| match client {
+                        Ok(client) => cosmic::Action::App(Message::CreatedClient(Ok(client))),
+                        Err(err) => cosmic::Action::App(Message::CreatedClient(Err(AppError::Network(err.to_string())))),
+                    },
+                );
+                commands.push(command);
+            }
+            Message::CreatedClient(result) => {
+                println!("Created client");
+                match result {
+                    Ok(client) => {
+                        self.client = Some(client);
+                    }
+                    Err(err) => {
+                        eprintln!("Error creating client: {}", err);
+                        self.dialog_pages.push_back(DialogPage::Info(AppError::Network(err.to_string())));
+                    }
+                }
+                commands.push(Task::done(cosmic::Action::App(Message::LoadRemoteState)));
+            }
+
+
+
+
             Message::ClientInitialized(client) => {
 
                 //commands.push(app.update_rawreads_data().map(cosmic::Action::App));
@@ -268,10 +305,26 @@ impl cosmic::Application for App {
                 //cosmic::Action::App(Message::LoadRemoteState);
             }
             Message::LoadRemoteState => {
-                commands.push(self.update_rawreads_data().map(cosmic::Action::App));
+                let client = self.client.clone();
+                let config = self.config.clone();
+                let command = Task::perform(
+                    async move {
+                        if let Some(client) = client {
+                            Item::get_raw_reads(&client, &config).await
+                        } else {
+                            Err(AppError::Network("Client not initialized".to_string()))
+                        }
+                    },
+                    |result| match result {
+                        Ok(remote_state) => cosmic::Action::App(Message::LoadedRemoteState(remote_state)),
+                        Err(err) => cosmic::Action::App(Message::Error(AppError::Network(err.to_string()))),
+                    },
+                );
+                commands.push(command);
                 
             }
             Message::LoadedRemoteState(result) => {
+                println!("Loaded remote state: {:?}", result);
                 self.items = result.items;
             }
             Message::Content(message) => {
@@ -338,7 +391,7 @@ impl cosmic::Application for App {
                 self.dialog_pages[0] = dialog_page;
             }
         }
-        Task::none()
+        Task::batch(commands)
     }
 
     /// Called when a nav item is selected.
