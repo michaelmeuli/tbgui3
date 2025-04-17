@@ -13,7 +13,6 @@ use cosmic::iced::{Length, Subscription};
 use cosmic::prelude::*;
 use cosmic::widget::menu::key_bind::KeyBind;
 use cosmic::widget::{self, nav_bar};
-use cosmic::{cosmic_theme, theme};
 use futures_util::SinkExt;
 use ssh::create_client;
 use std::collections::{HashMap, VecDeque};
@@ -47,7 +46,6 @@ pub struct App {
 pub enum Message {
     CreateClient,
     CreatedClient(Result<Client, AppError>),
-    CreatedClient2(Result<Client, AppError>),
     LoadRemoteState,
     LoadedRemoteState(RemoteState),
     Content(content::Message),
@@ -154,8 +152,6 @@ impl cosmic::Application for App {
             Some(some) => some,
             None => return None,
         };
-
-        let cosmic_theme::Spacing { space_xxs, .. } = theme::active().cosmic().spacing;
 
         let dialog = match dialog_page {
             DialogPage::Info(app_errored) => {
@@ -270,18 +266,7 @@ impl cosmic::Application for App {
                         self.dialog_pages.push_back(DialogPage::Info(AppError::Network(err.to_string())));
                     }
                 }
-                commands.push(Task::done(cosmic::Action::App(Message::LoadRemoteState)));
-            }
-
-
-
-
-            Message::CreatedClient2(client) => {
-
-                //commands.push(app.update_rawreads_data().map(cosmic::Action::App));
-                //self.client = Some(client);
-                //commands.push(self.get_rawreads_items().map(cosmic::Action::App));
-                //cosmic::Action::App(Message::LoadRemoteState);
+                commands.push(Task::done(cosmic::Action::App(Message::LoadRemoteState))); 
             }
             Message::LoadRemoteState => {
                 let client = self.client.clone();
@@ -303,8 +288,11 @@ impl cosmic::Application for App {
                 
             }
             Message::LoadedRemoteState(result) => {
+                let items = result.items.clone();
                 println!("Loaded remote state: {:?}", result);
                 self.items = result.items;
+                //commands.push(Task::done(cosmic::Action::App(Message::Content(content::Message::SetItems(Vec::new())))));
+                commands.push(Task::done(cosmic::Action::App(Message::Content(content::Message::SetItems(items)))));
             }
             Message::Content(message) => {
                 let content_items = self.content.update(message);
