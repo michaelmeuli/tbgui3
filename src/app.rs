@@ -1,6 +1,7 @@
 use crate::content::{self, Content};
 use crate::fl;
 use crate::model::sample::Item;
+use crate::model::sample::ProfilerTask;
 use crate::model::sample::RemoteState;
 use crate::views::nav::{get_nav_model, Action, ContextPage, NavPage};
 use async_ssh2_tokio::client::Client;
@@ -48,6 +49,8 @@ pub enum Message {
     CreatedClient(Result<Client, AppError>),
     LoadRemoteState,
     LoadedRemoteState(RemoteState),
+    LoadRemoteState2,
+    LoadedRemoteState2(Vec<ProfilerTask>),
     Content(content::Message),
     RunTbProfiler,
     OpenRepositoryUrl,
@@ -267,6 +270,7 @@ impl cosmic::Application for App {
                     }
                 }
                 commands.push(Task::done(cosmic::Action::App(Message::LoadRemoteState))); 
+                commands.push(Task::done(cosmic::Action::App(Message::LoadRemoteState2)));
             }
             Message::LoadRemoteState => {
                 let client = self.client.clone();
@@ -287,10 +291,31 @@ impl cosmic::Application for App {
                 commands.push(command);
                 
             }
+            Message::LoadRemoteState2 => {
+                let client = self.client.clone();
+                let config = self.config.clone();
+                let command = Task::perform(
+                    async move {
+                        if let Some(client) = client {
+                            ProfilerTask::get_raw_reads(&client, &config).await
+                        } else {
+                            Err(AppError::Network("Client not initialized".to_string()))
+                        }
+                    },
+                    |result| match result {
+                        Ok(remote_state) => cosmic::Action::App(Message::LoadedRemoteState2(remote_state)),
+                        Err(err) => cosmic::Action::App(Message::Error(AppError::Network(err.to_string()))),
+                    },
+                );
+                commands.push(command);
+                
+            }
             Message::LoadedRemoteState(result) => {
-                let items = result.items.clone();
                 println!("Loaded remote state: {:?}", result);
                 self.items = result.items;
+            }
+            Message::LoadedRemoteState2(result) => {
+                let items = result.clone();
                 //commands.push(Task::done(cosmic::Action::App(Message::Content(content::Message::SetItems(Vec::new())))));
                 //commands.push(Task::done(cosmic::Action::App(Message::Content(content::Message::SetItems(items)))));
                 let message = Message::Content(content::Message::SetItems(items));
@@ -300,9 +325,11 @@ impl cosmic::Application for App {
                 let content_items = self.content.update(message);
                 for content_item in content_items {
                     match content_item {
-                        content::Task::Get(list_id) => {
-                            //commands.push(self.get_rawreads_items().map(cosmic::Action::App));
-                            //commands.push(self.update_rawreads_data().map(cosmic::Action::App));
+                        content::TaskMessage::Get(list_id) => {
+
+                        }
+                        content::TaskMessage::Update(task) => {
+
                         }
                     }
                 }
@@ -370,27 +397,6 @@ impl App {
                 },
             )
         } else {
-            Task::none()
-        }
-    }
-
-    pub fn get_rawreads_items(&self) -> Task<Message> {
-        println!("get_rawreads_items");
-        let client = self.client.clone();
-        let config = self.config.clone();
-        if let Some(client) = client {
-            Task::perform(
-                async move { Item::get_paired_reads_as_items(&client, &config).await },
-                |result| match result {
-                    Ok(data) => {
-                        println!("get_rawreads_items: {:?}", data);
-                        Message::Content(content::Message::SetItems(data))
-                    } //.map(cosmic::Action::App)
-                    Err(err) => Message::Error(AppError::Network(err.to_string())),
-                },
-            )
-        } else {
-            println!("get_rawreads_items: no client");
             Task::none()
         }
     }
