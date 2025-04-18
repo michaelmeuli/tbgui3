@@ -94,7 +94,7 @@ impl Content {
                 }
             }
         }
-        tasks.push(Task::Get("".to_string()));
+        //tasks.push(Task::Get("".to_string()));
         tasks
     }
 

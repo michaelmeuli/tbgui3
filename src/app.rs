@@ -292,14 +292,16 @@ impl cosmic::Application for App {
                 println!("Loaded remote state: {:?}", result);
                 self.items = result.items;
                 //commands.push(Task::done(cosmic::Action::App(Message::Content(content::Message::SetItems(Vec::new())))));
-                commands.push(Task::done(cosmic::Action::App(Message::Content(content::Message::SetItems(items)))));
+                //commands.push(Task::done(cosmic::Action::App(Message::Content(content::Message::SetItems(items)))));
+                let message = Message::Content(content::Message::SetItems(items));
+                return self.update(message)
             }
             Message::Content(message) => {
                 let content_items = self.content.update(message);
                 for content_item in content_items {
                     match content_item {
                         content::Task::Get(list_id) => {
-                            commands.push(self.get_rawreads_items().map(cosmic::Action::App));
+                            //commands.push(self.get_rawreads_items().map(cosmic::Action::App));
                             //commands.push(self.update_rawreads_data().map(cosmic::Action::App));
                         }
                     }
