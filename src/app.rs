@@ -1,8 +1,6 @@
 use crate::content::{self, Content};
 use crate::fl;
-use crate::model::sample::Item;
 use crate::model::sample::ProfilerTask;
-use crate::model::sample::RemoteState;
 use crate::views::nav::{get_nav_model, Action, ContextPage, NavPage};
 use async_ssh2_tokio::client::Client;
 use config::TbguiConfig;
@@ -35,7 +33,6 @@ pub struct App {
     context_page: ContextPage,
     nav_model: nav_bar::Model,
     client: Option<Client>,
-    pub items: Vec<Item>,
     content: Content,
     key_binds: HashMap<KeyBind, Action>,
     config: TbguiConfig,
@@ -47,8 +44,6 @@ pub struct App {
 pub enum Message {
     CreateClient,
     CreatedClient(Result<Client, AppError>),
-    LoadRemoteState,
-    LoadedRemoteState(RemoteState),
     LoadRemoteState2,
     LoadedRemoteState2(Vec<ProfilerTask>),
     Content(content::Message),
@@ -92,7 +87,6 @@ impl cosmic::Application for App {
             context_page: ContextPage::default(),
             nav_model: get_nav_model(&flags),
             client: None,
-            items: Vec::new(),
             content: Content::new(),
             key_binds: HashMap::new(),
             // Optional configuration file for an application.
@@ -117,12 +111,6 @@ impl cosmic::Application for App {
 
         app.core.nav_bar_set_toggled(false);
 
-        // TODO: remove as replaced by content
-        // if app.items.is_empty() {
-        //     commands.push(app.update_rawreads_data().map(cosmic::Action::App));
-        // }
-
-        // Create a startup command that sets the window title.  //TODO?
         let command = app.update_title();
         commands.push(command);
 
@@ -190,9 +178,9 @@ impl cosmic::Application for App {
 
     fn view(&self) -> Element<Self::Message> {
         let page_view = match self.nav_model.active_data::<NavPage>() {
-            Some(NavPage::RunTbProfiler) => self.view_raw_sequences(),
-            Some(NavPage::DownloadResults) => self.content.view().map(Message::Content),
-            Some(NavPage::DeleteResults) => self.view_raw_sequences2(),
+            Some(NavPage::RunTbProfiler) => self.content.view().map(Message::Content),
+            Some(NavPage::DownloadResults) => self.view_settings(),
+            Some(NavPage::DeleteResults) => self.view_settings(),
             Some(NavPage::Settings) => self.view_settings(),
             None => cosmic::widget::text("Unkown page selected.").into(),
         };
@@ -269,27 +257,7 @@ impl cosmic::Application for App {
                         self.dialog_pages.push_back(DialogPage::Info(AppError::Network(err.to_string())));
                     }
                 }
-                commands.push(Task::done(cosmic::Action::App(Message::LoadRemoteState))); 
                 commands.push(Task::done(cosmic::Action::App(Message::LoadRemoteState2)));
-            }
-            Message::LoadRemoteState => {
-                let client = self.client.clone();
-                let config = self.config.clone();
-                let command = Task::perform(
-                    async move {
-                        if let Some(client) = client {
-                            Item::get_raw_reads(&client, &config).await
-                        } else {
-                            Err(AppError::Network("Client not initialized".to_string()))
-                        }
-                    },
-                    |result| match result {
-                        Ok(remote_state) => cosmic::Action::App(Message::LoadedRemoteState(remote_state)),
-                        Err(err) => cosmic::Action::App(Message::Error(AppError::Network(err.to_string()))),
-                    },
-                );
-                commands.push(command);
-                
             }
             Message::LoadRemoteState2 => {
                 let client = self.client.clone();
@@ -309,10 +277,6 @@ impl cosmic::Application for App {
                 );
                 commands.push(command);
                 
-            }
-            Message::LoadedRemoteState(result) => {
-                println!("Loaded remote state: {:?}", result);
-                self.items = result.items;
             }
             Message::LoadedRemoteState2(result) => {
                 let items = result.clone();
@@ -384,23 +348,6 @@ impl cosmic::Application for App {
 }
 
 impl App {
-    // TODO: remove as replaced by content
-    pub fn update_rawreads_data(&self) -> Task<Message> {
-        let client = self.client.clone();
-        let config = self.config.clone();
-        if let Some(client) = client {
-            Task::perform(
-                async move { Item::get_raw_reads(&client, &config).await },
-                |result| match result {
-                    Ok(remote_state) => Message::LoadedRemoteState(remote_state),
-                    Err(err) => Message::Error(AppError::Network(err.to_string())),
-                },
-            )
-        } else {
-            Task::none()
-        }
-    }
-
     pub fn update_title(&mut self) -> Task<cosmic::Action<Message>> {
         let mut window_title = fl!("app-title");
 
