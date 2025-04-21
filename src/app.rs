@@ -1,8 +1,9 @@
 use crate::content::{self, Content};
 use crate::fl;
 use crate::model::Sample;
-use crate::views::nav::{get_nav_model, Action, NavPage};
+use crate::views::nav::{get_nav_model, NavPage};
 use crate::context::ContextPage;
+use crate::actions::Action;
 use async_ssh2_tokio::client::Client;
 use config::TbguiConfig;
 use cosmic::app::context_drawer;
@@ -358,7 +359,15 @@ impl cosmic::Application for App {
                 ApplicationAction::SystemThemeModeChange => {}
                 ApplicationAction::Focus(_) => {}
                 ApplicationAction::ToggleContextDrawer => {}
-                ApplicationAction::ToggleContextPage(_) => {}
+                
+                ApplicationAction::ToggleContextPage(context_page) => {
+                    if self.context_page == context_page {
+                        self.core.window.show_context = !self.core.window.show_context;
+                    } else {
+                        self.context_page = context_page;
+                        self.core.window.show_context = true;
+                    }
+                }
             }
         }
         Task::batch(commands)

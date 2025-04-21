@@ -60,18 +60,3 @@ pub fn get_nav_model(flags: &Flags) -> nav_bar::Model {
     nav_model
 }
 
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum Action {
-    About,
-}
-
-impl MenuAction for Action {
-    type Message = Message;
-
-    fn message(&self) -> Self::Message {
-        match self {
-            Action::About => Message::ToggleContextPage(ContextPage::About),
-        }
-    }
-}
