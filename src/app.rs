@@ -1,7 +1,8 @@
 use crate::content::{self, Content};
 use crate::fl;
 use crate::model::sample::ProfilerTask;
-use crate::views::nav::{get_nav_model, Action, ContextPage, NavPage};
+use crate::views::nav::{get_nav_model, Action, NavPage};
+use crate::context::ContextPage;
 use async_ssh2_tokio::client::Client;
 use config::TbguiConfig;
 use cosmic::app::context_drawer;
@@ -84,10 +85,11 @@ impl cosmic::Application for App {
         // Construct the app model with the runtime's core.
         let mut app = App {
             core,
-            context_page: ContextPage::default(),
+            context_page: ContextPage::About,
             nav_model: get_nav_model(&flags),
             client: None,
             content: Content::new(),
+            config_handler: flags.config_handler,
             key_binds: HashMap::new(),
             // Optional configuration file for an application.
             config: cosmic_config::Config::new(Self::APP_ID, TbguiConfig::VERSION)
@@ -102,7 +104,6 @@ impl cosmic::Application for App {
                     }
                 })
                 .unwrap_or_default(),
-            config_handler: flags.config_handler,
             dialog_pages: VecDeque::new(),
         };
 

@@ -5,6 +5,7 @@ use crate::fl;
 use cosmic::widget::menu::action::MenuAction;
 use cosmic::widget::{self, nav_bar};
 use serde::{Deserialize, Serialize};
+use crate::context::ContextPage;
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub enum NavPage {
@@ -59,12 +60,6 @@ pub fn get_nav_model(flags: &Flags) -> nav_bar::Model {
     nav_model
 }
 
-/// The context page to display in the context drawer.
-#[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
-pub enum ContextPage {
-    #[default]
-    About,
-}
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Action {

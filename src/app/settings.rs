@@ -9,6 +9,7 @@ pub fn settings() -> Settings {
     Settings::default()
         .antialiasing(true)
         .client_decorations(true)
+        .theme(TbguiConfig::config().app_theme.theme())
         .debug(false)
     // .size_limits(
     //     cosmic::iced::Limits::NONE
