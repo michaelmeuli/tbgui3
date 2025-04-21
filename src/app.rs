@@ -31,7 +31,7 @@ pub mod ssh;
 pub mod types;
 pub mod utils;
 
-pub struct App {
+pub struct Tbgui {
     core: Core,
     context_page: ContextPage,
     nav_model: nav_bar::Model,
@@ -68,7 +68,7 @@ pub struct Flags {
     pub config: TbguiConfig,
 }
 
-impl cosmic::Application for App {
+impl cosmic::Application for Tbgui {
     type Executor = cosmic::executor::Default;
     type Flags = Flags;
     type Message = Message;
@@ -87,7 +87,7 @@ impl cosmic::Application for App {
         let mut commands = vec![];
 
         // Construct the app model with the runtime's core.
-        let mut app = App {
+        let mut app = Tbgui {
             core,
             context_page: ContextPage::About,
             nav_model: get_nav_model(&flags),
@@ -372,7 +372,7 @@ impl cosmic::Application for App {
     }
 }
 
-impl App {
+impl Tbgui {
     pub fn update_title(&mut self) -> Task<cosmic::Action<Message>> {
         let mut window_title = fl!("app-title");
 

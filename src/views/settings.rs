@@ -1,4 +1,4 @@
-use crate::app::{App, Message};
+use crate::app::{Tbgui, Message};
 use cosmic::widget;
 use cosmic::Element;
 
@@ -6,7 +6,7 @@ use cosmic::iced::alignment::{Horizontal, Vertical};
 use cosmic::iced::Length;
 use cosmic::prelude::*;
 
-impl App
+impl Tbgui
 where
     Self: cosmic::Application,
 {

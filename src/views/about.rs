@@ -1,4 +1,4 @@
-use crate::app::{App, Message};
+use crate::app::{Tbgui, Message};
 use crate::fl;
 use cosmic::iced::Alignment;
 use cosmic::widget;
@@ -8,7 +8,7 @@ use cosmic::{cosmic_theme, theme};
 const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
 const APP_ICON: &[u8] = include_bytes!("../../resources/icons/uzh-logo-white.svg");
 
-impl App
+impl Tbgui
 where
     Self: cosmic::Application,
 {

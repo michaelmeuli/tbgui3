@@ -4,7 +4,7 @@ use cosmic::{
 };
 use serde::{Deserialize, Serialize};
 
-use super::{App, NavPage};
+use super::{Tbgui, NavPage};
 
 pub const CONFIG_VERSION: u64 = 1;
 
@@ -66,7 +66,7 @@ const fn default_env(v: Option<&'static str>, default: &'static str) -> &'static
 
 impl TbguiConfig {
     pub fn config_handler() -> Option<Config> {
-        Config::new(App::APP_ID, CONFIG_VERSION).ok()
+        Config::new(Tbgui::APP_ID, CONFIG_VERSION).ok()
     }
 
     pub fn config() -> TbguiConfig {
