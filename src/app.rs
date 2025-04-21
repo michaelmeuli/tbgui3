@@ -1,6 +1,6 @@
 use crate::content::{self, Content};
 use crate::fl;
-use crate::model::sample::ProfilerTask;
+use crate::model::Sample;
 use crate::views::nav::{get_nav_model, Action, NavPage};
 use crate::context::ContextPage;
 use async_ssh2_tokio::client::Client;
@@ -17,6 +17,7 @@ use futures_util::SinkExt;
 use ssh::create_client;
 use std::collections::{HashMap, VecDeque};
 use types::{AppError, DialogPage};
+use crate::actions::ApplicationAction;
 
 const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
 
@@ -46,8 +47,11 @@ pub enum Message {
     CreateClient,
     CreatedClient(Result<Client, AppError>),
     LoadRemoteState2,
-    LoadedRemoteState2(Vec<ProfilerTask>),
+    LoadedRemoteState2(Vec<Sample>),
+
     Content(content::Message),
+    Application(ApplicationAction),
+
     RunTbProfiler,
     OpenRepositoryUrl,
     SubscriptionChannel,
@@ -135,7 +139,7 @@ impl cosmic::Application for App {
                 self.about(),
                 Message::ToggleContextPage(ContextPage::About),
             )
-            .title(fl!("about")),
+            .title(self.context_page.title()),
         })
     }
 
@@ -266,7 +270,7 @@ impl cosmic::Application for App {
                 let command = Task::perform(
                     async move {
                         if let Some(client) = client {
-                            ProfilerTask::get_raw_reads(&client, &config).await
+                            Sample::get_raw_reads(&client, &config).await
                         } else {
                             Err(AppError::Network("Client not initialized".to_string()))
                         }
@@ -328,7 +332,7 @@ impl cosmic::Application for App {
                 Err(err) => {
                     eprintln!("failed to open {url:?}: {err}");
                 }
-            },
+            }
             Message::Error(err) => {
                 eprintln!("Error: {}", err);
                 self.dialog_pages.pop_front();
@@ -336,6 +340,25 @@ impl cosmic::Application for App {
             }
             Message::DialogCancel => {
                 self.dialog_pages.pop_front();
+            }
+            Message::Application(action) => match action {
+                ApplicationAction::WindowClose => {
+                    commands.push(Task::done(cosmic::Action::App(Message::Application(
+                        ApplicationAction::WindowClose,
+                    ))));
+                }
+                ApplicationAction::WindowNew => {
+                    commands.push(Task::done(cosmic::Action::App(Message::Application(
+                        ApplicationAction::WindowNew,
+                    ))));
+                }
+                ApplicationAction::Key(_, _) => {}
+                ApplicationAction::Modifiers(_) => {}
+                ApplicationAction::AppTheme(_) => {}
+                ApplicationAction::SystemThemeModeChange => {}
+                ApplicationAction::Focus(_) => {}
+                ApplicationAction::ToggleContextDrawer => {}
+                ApplicationAction::ToggleContextPage(_) => {}
             }
         }
         Task::batch(commands)

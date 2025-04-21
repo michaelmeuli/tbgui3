@@ -4,7 +4,7 @@ use app::{
 };
 
 mod app;
-//mod actions;
+mod actions;
 mod content;
 mod context;
 mod model;

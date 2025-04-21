@@ -19,6 +19,15 @@ dark = Dark
 light = Light
 system = Match desktop
 
+# Details
+title = Title
+details = Details
+favorite = Favorite
+priority = Priority
+due-date = Due date
+reminder = Reminder
+notes = Notes
+
 # Empty
 no-tasks = No tasks
 no-tasks-suggestion = Try adding a task with the text field below

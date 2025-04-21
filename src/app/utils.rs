@@ -1,6 +1,5 @@
 use super::config::TbguiConfig;
 use super::types::AppError;
-use crate::model::sample::Item;
 use crate::RESULT_DIR_LOCAL;
 use async_ssh2_tokio::client::Client;
 use directories_next::UserDirs;
@@ -12,7 +11,6 @@ use std::path::PathBuf;
 use tokio::fs::{create_dir_all, File};
 use tokio::io::AsyncReadExt;
 use tokio::io::AsyncWriteExt;
-use uuid::Uuid;
 
 pub async fn download_file(
     sftp: &SftpSession,

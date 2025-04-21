@@ -8,12 +8,12 @@ use cosmic::{
 use crate::app::icon_cache::get_icon;
 use slotmap::{DefaultKey, SecondaryMap, SlotMap};
 use crate::{app::icon_cache, fl};
-use crate::model::{self, list::List, status::Status};
+use crate::model::{self, List, Sample, status::Status};
 
 
 
 pub struct Content {
-    tasks: SlotMap<DefaultKey, model::sample::ProfilerTask>,
+    tasks: SlotMap<DefaultKey, Sample>,
     task_input_ids: SecondaryMap<DefaultKey, widget::Id>,
 }
 
@@ -21,14 +21,14 @@ pub struct Content {
 #[derive(Debug, Clone)]
 pub enum Message {
     Complete(DefaultKey, bool),
-    SetItems(Vec<model::sample::ProfilerTask>),
+    SetItems(Vec<Sample>),
 
 }
 
 
 pub enum TaskMessage {
     Get(String),
-    Update(model::sample::ProfilerTask),
+    Update(Sample),
     
 }
 
