@@ -47,8 +47,8 @@ pub struct App {
 pub enum Message {
     CreateClient,
     CreatedClient(Result<Client, AppError>),
-    LoadRemoteState2,
-    LoadedRemoteState2(Vec<Sample>),
+    LoadRemoteState,
+    LoadedRemoteState(Vec<Sample>),
 
     Content(content::Message),
     Application(ApplicationAction),
@@ -265,9 +265,9 @@ impl cosmic::Application for App {
                             .push_back(DialogPage::Info(AppError::Network(err.to_string())));
                     }
                 }
-                commands.push(Task::done(cosmic::Action::App(Message::LoadRemoteState2)));
+                commands.push(Task::done(cosmic::Action::App(Message::LoadRemoteState)));
             }
-            Message::LoadRemoteState2 => {
+            Message::LoadRemoteState => {
                 let client = self.client.clone();
                 let config = self.config.clone();
                 let command = Task::perform(
@@ -280,7 +280,7 @@ impl cosmic::Application for App {
                     },
                     |result| match result {
                         Ok(remote_state) => {
-                            cosmic::Action::App(Message::LoadedRemoteState2(remote_state))
+                            cosmic::Action::App(Message::LoadedRemoteState(remote_state))
                         }
                         Err(err) => {
                             cosmic::Action::App(Message::Error(AppError::Network(err.to_string())))
@@ -289,7 +289,7 @@ impl cosmic::Application for App {
                 );
                 commands.push(command);
             }
-            Message::LoadedRemoteState2(result) => {
+            Message::LoadedRemoteState(result) => {
                 let items = result.clone();
                 //commands.push(Task::done(cosmic::Action::App(Message::Content(content::Message::SetItems(Vec::new())))));
                 //commands.push(Task::done(cosmic::Action::App(Message::Content(content::Message::SetItems(items)))));
