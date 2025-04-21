@@ -1,9 +1,10 @@
+use crate::actions::Action;
+use crate::actions::ApplicationAction;
 use crate::content::{self, Content};
+use crate::context::ContextPage;
 use crate::fl;
 use crate::model::Sample;
 use crate::views::nav::{get_nav_model, NavPage};
-use crate::context::ContextPage;
-use crate::actions::Action;
 use async_ssh2_tokio::client::Client;
 use config::TbguiConfig;
 use cosmic::app::context_drawer;
@@ -18,7 +19,6 @@ use futures_util::SinkExt;
 use ssh::create_client;
 use std::collections::{HashMap, VecDeque};
 use types::{AppError, DialogPage};
-use crate::actions::ApplicationAction;
 
 const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
 
@@ -56,7 +56,6 @@ pub enum Message {
     RunTbProfiler,
     OpenRepositoryUrl,
     SubscriptionChannel,
-    ToggleContextPage(ContextPage),
     UpdateConfig(TbguiConfig),
     LaunchUrl(String),
     Error(AppError),
@@ -138,7 +137,7 @@ impl cosmic::Application for App {
         Some(match self.context_page {
             ContextPage::About => context_drawer::context_drawer(
                 self.about(),
-                Message::ToggleContextPage(ContextPage::About),
+                Message::Application(ApplicationAction::ToggleContextPage(ContextPage::About)),
             )
             .title(self.context_page.title()),
         })
@@ -241,13 +240,15 @@ impl cosmic::Application for App {
                 println!("CreateClient2");
                 let config = self.config.clone();
                 let command = Task::perform(
-                    async move { 
+                    async move {
                         println!("CreateClient3");
-                        create_client(&config).await 
+                        create_client(&config).await
                     },
                     |client| match client {
                         Ok(client) => cosmic::Action::App(Message::CreatedClient(Ok(client))),
-                        Err(err) => cosmic::Action::App(Message::CreatedClient(Err(AppError::Network(err.to_string())))),
+                        Err(err) => cosmic::Action::App(Message::CreatedClient(Err(
+                            AppError::Network(err.to_string()),
+                        ))),
                     },
                 );
                 commands.push(command);
@@ -260,7 +261,8 @@ impl cosmic::Application for App {
                     }
                     Err(err) => {
                         eprintln!("Error creating client: {}", err);
-                        self.dialog_pages.push_back(DialogPage::Info(AppError::Network(err.to_string())));
+                        self.dialog_pages
+                            .push_back(DialogPage::Info(AppError::Network(err.to_string())));
                     }
                 }
                 commands.push(Task::done(cosmic::Action::App(Message::LoadRemoteState2)));
@@ -277,30 +279,29 @@ impl cosmic::Application for App {
                         }
                     },
                     |result| match result {
-                        Ok(remote_state) => cosmic::Action::App(Message::LoadedRemoteState2(remote_state)),
-                        Err(err) => cosmic::Action::App(Message::Error(AppError::Network(err.to_string()))),
+                        Ok(remote_state) => {
+                            cosmic::Action::App(Message::LoadedRemoteState2(remote_state))
+                        }
+                        Err(err) => {
+                            cosmic::Action::App(Message::Error(AppError::Network(err.to_string())))
+                        }
                     },
                 );
                 commands.push(command);
-                
             }
             Message::LoadedRemoteState2(result) => {
                 let items = result.clone();
                 //commands.push(Task::done(cosmic::Action::App(Message::Content(content::Message::SetItems(Vec::new())))));
                 //commands.push(Task::done(cosmic::Action::App(Message::Content(content::Message::SetItems(items)))));
                 let message = Message::Content(content::Message::SetItems(items));
-                return self.update(message)
+                return self.update(message);
             }
             Message::Content(message) => {
                 let content_items = self.content.update(message);
                 for content_item in content_items {
                     match content_item {
-                        content::TaskMessage::Get(list_id) => {
-
-                        }
-                        content::TaskMessage::Update(task) => {
-
-                        }
+                        content::TaskMessage::Get(list_id) => {}
+                        content::TaskMessage::Update(task) => {}
                     }
                 }
             }
@@ -315,15 +316,6 @@ impl cosmic::Application for App {
                 // For example purposes only.
             }
 
-            Message::ToggleContextPage(context_page) => {
-                if self.context_page == context_page {
-                    self.core.window.show_context = !self.core.window.show_context;
-                } else {
-                    self.context_page = context_page;
-                    self.core.window.show_context = true;
-                }
-            }
-
             Message::UpdateConfig(config) => {
                 self.config = config;
             }
@@ -333,7 +325,7 @@ impl cosmic::Application for App {
                 Err(err) => {
                     eprintln!("failed to open {url:?}: {err}");
                 }
-            }
+            },
             Message::Error(err) => {
                 eprintln!("Error: {}", err);
                 self.dialog_pages.pop_front();
@@ -359,7 +351,7 @@ impl cosmic::Application for App {
                 ApplicationAction::SystemThemeModeChange => {}
                 ApplicationAction::Focus(_) => {}
                 ApplicationAction::ToggleContextDrawer => {}
-                
+
                 ApplicationAction::ToggleContextPage(context_page) => {
                     if self.context_page == context_page {
                         self.core.window.show_context = !self.core.window.show_context;
@@ -368,7 +360,7 @@ impl cosmic::Application for App {
                         self.core.window.show_context = true;
                     }
                 }
-            }
+            },
         }
         Task::batch(commands)
     }
