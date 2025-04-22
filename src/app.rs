@@ -12,6 +12,7 @@ use crate::dialog::DialogPage;
 use crate::fl;
 use crate::model::Sample;
 use crate::views::nav::{get_nav_model, NavPage};
+use crate::app::key_bind::key_binds;
 use async_ssh2_tokio::client::Client;
 use config::TbguiConfig;
 use cosmic::app::context_drawer;
@@ -23,6 +24,7 @@ use cosmic::prelude::*;
 use cosmic::widget::menu::key_bind::KeyBind;
 use cosmic::widget::{self, nav_bar};
 use cosmic::iced::keyboard::Modifiers;
+use cosmic::widget::menu::Action as _;
 use futures_util::SinkExt;
 use ssh::create_client;
 use types::AppError;
@@ -37,6 +39,7 @@ pub mod settings;
 pub mod ssh;
 pub mod types;
 pub mod utils;
+pub mod key_bind;
 
 pub struct Tbgui {
     core: Core,
@@ -134,7 +137,7 @@ impl cosmic::Application for Tbgui {
             content: Content::new(),
             config_handler: flags.config_handler,
             config: flags.config,
-            key_binds: HashMap::new(),
+            key_binds: key_binds(),
             modifiers: Modifiers::empty(),
             app_themes: vec![fl!("match-desktop"), fl!("dark"), fl!("light")],
             dialog_pages: VecDeque::new(),
@@ -354,8 +357,6 @@ impl cosmic::Application for Tbgui {
                         eprintln!("failed to get current executable path: {err}");
                     }
                 },
-                ApplicationAction::Key(_, _) => {}
-                ApplicationAction::Modifiers(_) => {}
 
                 ApplicationAction::AppTheme(theme) => {
                     if let Some(handler) = &self.config_handler {
@@ -364,8 +365,17 @@ impl cosmic::Application for Tbgui {
                         }
                     }
                 }
-
-                ApplicationAction::SystemThemeModeChange => {}
+                ApplicationAction::SystemThemeModeChange => {}  //TODO: implement this
+                ApplicationAction::Key(modifiers, key) => {
+                    for (key_bind, action) in &self.key_binds {
+                        if key_bind.matches(modifiers, &key) {
+                            return self.update(action.message());
+                        }
+                    }
+                }
+                ApplicationAction::Modifiers(modifiers) => {
+                    self.modifiers = modifiers;
+                }
                 ApplicationAction::Focus(_) => {}
 
                 ApplicationAction::ToggleContextPage(context_page) => {
