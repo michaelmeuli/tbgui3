@@ -22,6 +22,7 @@ use cosmic::iced::{Length, Subscription};
 use cosmic::prelude::*;
 use cosmic::widget::menu::key_bind::KeyBind;
 use cosmic::widget::{self, nav_bar};
+use cosmic::iced::keyboard::Modifiers;
 use futures_util::SinkExt;
 use ssh::create_client;
 use types::AppError;
@@ -39,14 +40,15 @@ pub mod utils;
 
 pub struct Tbgui {
     core: Core,
-    context_page: ContextPage,
     nav_model: nav_bar::Model,
     client: Option<Client>,
     content: Content,
-    key_binds: HashMap<KeyBind, Action>,
+    config_handler: Option<cosmic_config::Config>,
     config: TbguiConfig,
     app_themes: Vec<String>,
-    config_handler: Option<cosmic_config::Config>,
+    context_page: ContextPage,
+    key_binds: HashMap<KeyBind, Action>,
+    modifiers: Modifiers,
     dialog_pages: VecDeque<DialogPage>,
     dialog_text_input: widget::Id,
 }
@@ -131,7 +133,6 @@ impl cosmic::Application for Tbgui {
             client: None,
             content: Content::new(),
             config_handler: flags.config_handler,
-            key_binds: HashMap::new(),
             // Optional configuration file for an application.
             config: cosmic_config::Config::new(Self::APP_ID, TbguiConfig::VERSION)
                 .map(|context| match TbguiConfig::get_entry(&context) {
@@ -145,6 +146,8 @@ impl cosmic::Application for Tbgui {
                     }
                 })
                 .unwrap_or_default(),
+            key_binds: HashMap::new(),
+            modifiers: Modifiers::empty(),
             app_themes: vec![fl!("match-desktop"), fl!("dark"), fl!("light")],
             dialog_pages: VecDeque::new(),
             dialog_text_input: widget::Id::unique(),
