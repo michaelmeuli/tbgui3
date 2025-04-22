@@ -25,7 +25,8 @@ use cosmic::widget::menu::key_bind::KeyBind;
 use cosmic::widget::{self, nav_bar};
 use cosmic::iced::keyboard::Modifiers;
 use cosmic::widget::menu::Action as _;
-use futures_util::SinkExt;
+use cosmic::iced::Event;
+use cosmic::iced::keyboard::Event as KeyEvent;
 use ssh::create_client;
 use types::AppError;
 
@@ -204,24 +205,19 @@ impl cosmic::Application for Tbgui {
             .into()
     }
 
-    /// Register subscriptions for this application.
-    ///
-    /// Subscriptions are long-running async tasks running in the background which
-    /// emit messages to the application through a channel. They are started at the
-    /// beginning of the application, and persist through its lifetime.
     fn subscription(&self) -> Subscription<Self::Message> {
         struct MySubscription;
 
         Subscription::batch(vec![
-            // Create a subscription which emits updates through a channel.
-            Subscription::run_with_id(
-                std::any::TypeId::of::<MySubscription>(),
-                cosmic::iced::stream::channel(4, move |mut channel| async move {
-                    _ = channel.send(Message::SubscriptionChannel).await;
-
-                    futures_util::future::pending().await
-                }),
-            ),
+            cosmic::iced::event::listen_with(|event, _status, _window_id| match event {
+                Event::Keyboard(KeyEvent::KeyPressed { key, modifiers, .. }) => {
+                    Some(Message::Application(ApplicationAction::Key(modifiers, key)))
+                }
+                Event::Keyboard(KeyEvent::ModifiersChanged(modifiers)) => Some(
+                    Message::Application(ApplicationAction::Modifiers(modifiers)),
+                ),
+                _ => None,
+            }),
             // Watch for application configuration changes.
             self.core()
                 .watch_config::<TbguiConfig>(Self::APP_ID)
