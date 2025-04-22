@@ -42,6 +42,7 @@ pub struct Tbgui {
     config: TbguiConfig,
     config_handler: Option<cosmic_config::Config>,
     dialog_pages: VecDeque<DialogPage>,
+    dialog_text_input: widget::Id,
 }
 
 #[derive(Debug, Clone)]
@@ -110,6 +111,7 @@ impl cosmic::Application for Tbgui {
                 })
                 .unwrap_or_default(),
             dialog_pages: VecDeque::new(),
+            dialog_text_input: widget::Id::unique(),
         };
 
         println!("CreateClient");
@@ -145,40 +147,8 @@ impl cosmic::Application for Tbgui {
     }
 
     fn dialog(&self) -> Option<Element<Message>> {
-        let dialog_page = match self.dialog_pages.front() {
-            Some(some) => some,
-            None => return None,
-        };
-
-        let dialog = match dialog_page {
-            DialogPage::Info(app_errored) => {
-                let mut content = widget::column::with_capacity(2).spacing(12);
-
-                match app_errored {
-                    AppError::Network(body) => {
-                        let title = widget::text::title4("Network error");
-                        content = content.push(title);
-                        content = content.push(widget::text(body));
-                    }
-                    AppError::NoItemsChecked(body) => {
-                        let title =
-                            widget::text::title4("Cannot run tbprofiler with zero items checked");
-                        content = content.push(title);
-                        content = content.push(widget::text::body(body));
-                    }
-                    AppError::IO(body) => {
-                        let title = widget::text::title4("IO error");
-                        content = content.push(title);
-                        content = content.push(widget::text(body));
-                    }
-                }
-                widget::dialog()
-                    .secondary_action(
-                        widget::button::standard(fl!("cancel")).on_press(Message::DialogCancel),
-                    )
-                    .control(content)
-            }
-        };
+        let dialog_page = self.dialog_pages.front()?;
+        let dialog = dialog_page.view(&self.dialog_text_input);
         Some(dialog.into())
     }
 
