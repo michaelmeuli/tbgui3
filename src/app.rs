@@ -133,19 +133,7 @@ impl cosmic::Application for Tbgui {
             client: None,
             content: Content::new(),
             config_handler: flags.config_handler,
-            // Optional configuration file for an application.
-            config: cosmic_config::Config::new(Self::APP_ID, TbguiConfig::VERSION)
-                .map(|context| match TbguiConfig::get_entry(&context) {
-                    Ok(config) => config,
-                    Err((_errors, config)) => {
-                        // for why in errors {
-                        //     tracing::error!(%why, "error loading app config");
-                        // }
-
-                        config
-                    }
-                })
-                .unwrap_or_default(),
+            config: flags.config,
             key_binds: HashMap::new(),
             modifiers: Modifiers::empty(),
             app_themes: vec![fl!("match-desktop"), fl!("dark"), fl!("light")],
