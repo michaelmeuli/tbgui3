@@ -171,12 +171,12 @@ impl cosmic::Application for Tbgui {
         Some(match self.context_page {
             ContextPage::About => context_drawer::context_drawer(
                 self.about(),
-                Message::Application(ApplicationAction::ToggleContextPage(ContextPage::About)),
+                Message::Application(ApplicationAction::ToggleContextDrawer),
             )
             .title(self.context_page.title()),
             ContextPage::Settings => context_drawer::context_drawer(
                 self.settings(),
-                Message::Application(ApplicationAction::ToggleContextPage(ContextPage::Settings)),
+                Message::Application(ApplicationAction::ToggleContextDrawer),
             )
             .title(self.context_page.title()),
         })
@@ -365,7 +365,6 @@ impl cosmic::Application for Tbgui {
 
                 ApplicationAction::SystemThemeModeChange => {}
                 ApplicationAction::Focus(_) => {}
-                ApplicationAction::ToggleContextDrawer => {}
 
                 ApplicationAction::ToggleContextPage(context_page) => {
                     if self.context_page == context_page {
@@ -374,6 +373,9 @@ impl cosmic::Application for Tbgui {
                         self.context_page = context_page;
                         self.core.window.show_context = true;
                     }
+                }
+                ApplicationAction::ToggleContextDrawer => {
+                    self.core.window.show_context = !self.core.window.show_context
                 }
             },
         }

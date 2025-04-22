@@ -5741,6 +5741,7 @@ dependencies = [
  "serde",
  "slotmap",
  "tokio",
+ "tracing",
  "uuid",
  "vergen",
 ]

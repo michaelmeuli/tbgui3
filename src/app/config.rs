@@ -85,10 +85,10 @@ impl TbguiConfig {
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub enum AppTheme {
-    Dark,
-    Light,
     #[default]
     System,
+    Dark,
+    Light,
 }
 
 impl From<usize> for AppTheme {
