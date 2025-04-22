@@ -7,6 +7,7 @@ mod actions;
 mod app;
 mod content;
 mod context;
+mod dialog;
 mod model;
 mod views;
 

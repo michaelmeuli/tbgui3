@@ -1,9 +1,4 @@
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub enum DialogPage {
-    Info(AppError),
-}
-
-#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum AppError {
     Network(String),
     NoItemsChecked(String),

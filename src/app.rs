@@ -18,7 +18,8 @@ use cosmic::widget::{self, nav_bar};
 use futures_util::SinkExt;
 use ssh::create_client;
 use std::collections::{HashMap, VecDeque};
-use types::{AppError, DialogPage};
+use types::AppError;
+use crate::dialog::DialogPage;
 
 const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
 
