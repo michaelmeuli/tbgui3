@@ -1,3 +1,9 @@
+use std::{
+    any::TypeId,
+    collections::{HashMap, VecDeque},
+    env, process,
+};
+
 use crate::actions::Action;
 use crate::actions::ApplicationAction;
 use crate::content::{self, Content};
@@ -18,7 +24,6 @@ use cosmic::widget::menu::key_bind::KeyBind;
 use cosmic::widget::{self, nav_bar};
 use futures_util::SinkExt;
 use ssh::create_client;
-use std::collections::{HashMap, VecDeque};
 use types::AppError;
 
 const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
@@ -341,17 +346,23 @@ impl cosmic::Application for Tbgui {
             Message::DialogCancel => {
                 self.dialog_pages.pop_front();
             }
-            Message::Application(action) => match action {
+            Message::Application(application_action) => match application_action {
                 ApplicationAction::WindowClose => {
-                    commands.push(Task::done(cosmic::Action::App(Message::Application(
-                        ApplicationAction::WindowClose,
-                    ))));
+                    if let Some(window_id) = self.core.main_window_id() {
+                        commands.push(cosmic::iced::window::close(window_id));
+                    }
                 }
-                ApplicationAction::WindowNew => {
-                    commands.push(Task::done(cosmic::Action::App(Message::Application(
-                        ApplicationAction::WindowNew,
-                    ))));
-                }
+                ApplicationAction::WindowNew => match env::current_exe() {
+                    Ok(exe) => match process::Command::new(&exe).spawn() {
+                        Ok(_) => {}
+                        Err(err) => {
+                            eprintln!("failed to execute {exe:?}: {err}");
+                        }
+                    },
+                    Err(err) => {
+                        eprintln!("failed to get current executable path: {err}");
+                    }
+                },
                 ApplicationAction::Key(_, _) => {}
                 ApplicationAction::Modifiers(_) => {}
 

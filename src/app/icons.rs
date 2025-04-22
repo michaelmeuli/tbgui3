@@ -43,7 +43,9 @@ impl IconCache {
         bundle!("settings", 16);
 
         bundle!("settings-symbolic", 14);
+        bundle!("tabs-stack-symbolic", 14);
         bundle!("info-outline-symbolic", 14);
+        bundle!("cross-small-square-filled-symbolic", 14);
 
         Self { cache }
     }
