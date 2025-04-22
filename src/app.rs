@@ -176,7 +176,7 @@ impl cosmic::Application for Tbgui {
             .title(self.context_page.title()),
             ContextPage::Settings => context_drawer::context_drawer(
                 self.settings(),
-                Message::Application(ApplicationAction::ToggleContextDrawer),
+                Message::Application(ApplicationAction::ToggleContextPage(ContextPage::Settings)),
             )
             .title(self.context_page.title()),
         })
@@ -354,7 +354,15 @@ impl cosmic::Application for Tbgui {
                 }
                 ApplicationAction::Key(_, _) => {}
                 ApplicationAction::Modifiers(_) => {}
-                ApplicationAction::AppTheme(_) => {}
+
+                ApplicationAction::AppTheme(theme) => {
+                    if let Some(handler) = &self.config_handler {
+                        if let Err(err) = self.config.set_app_theme(&handler, theme.into()) {
+                            tracing::error!("{err}")
+                        }
+                    }
+                }
+
                 ApplicationAction::SystemThemeModeChange => {}
                 ApplicationAction::Focus(_) => {}
                 ApplicationAction::ToggleContextDrawer => {}
