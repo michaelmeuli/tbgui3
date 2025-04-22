@@ -1,4 +1,4 @@
-use crate::app::{Tbgui, Message};
+use crate::app::{Message, Tbgui};
 use cosmic::widget;
 use cosmic::Element;
 

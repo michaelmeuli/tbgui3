@@ -3,8 +3,8 @@ use app::{
     Tbgui,
 };
 
-mod app;
 mod actions;
+mod app;
 mod content;
 mod context;
 mod model;

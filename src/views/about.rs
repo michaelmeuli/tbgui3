@@ -1,4 +1,4 @@
-use crate::app::{Tbgui, Message};
+use crate::app::{Message, Tbgui};
 use crate::fl;
 use cosmic::iced::Alignment;
 use cosmic::widget;

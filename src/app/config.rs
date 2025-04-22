@@ -4,7 +4,7 @@ use cosmic::{
 };
 use serde::{Deserialize, Serialize};
 
-use super::{Tbgui, NavPage};
+use super::{NavPage, Tbgui};
 
 pub const CONFIG_VERSION: u64 = 1;
 

@@ -49,4 +49,3 @@ impl MenuAction for Action {
         }
     }
 }
-

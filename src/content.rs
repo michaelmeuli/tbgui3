@@ -1,35 +1,32 @@
+use crate::app::icon_cache::get_icon;
+use crate::model::{self, status::Status, List, Sample};
+use crate::{app::icon_cache, fl};
 use cosmic::{
     iced::{
         alignment::{Horizontal, Vertical},
         task::Handle,
         Alignment, Length, Subscription,
-    }, iced_runtime::task, iced_widget::row, theme, widget, Apply, Element
+    },
+    iced_runtime::task,
+    iced_widget::row,
+    theme, widget, Apply, Element,
 };
-use crate::app::icon_cache::get_icon;
 use slotmap::{DefaultKey, SecondaryMap, SlotMap};
-use crate::{app::icon_cache, fl};
-use crate::model::{self, List, Sample, status::Status};
-
-
 
 pub struct Content {
     tasks: SlotMap<DefaultKey, Sample>,
     task_input_ids: SecondaryMap<DefaultKey, widget::Id>,
 }
 
-
 #[derive(Debug, Clone)]
 pub enum Message {
     Complete(DefaultKey, bool),
     SetItems(Vec<Sample>),
-
 }
-
 
 pub enum TaskMessage {
     Get(String),
     Update(Sample),
-    
 }
 
 impl Content {
@@ -63,33 +60,30 @@ impl Content {
             .spacing(spacing.space_xxxs)
             .padding([spacing.space_none, spacing.space_xxs]);
 
-            for (id, item) in &self.tasks {
-                let item_checkbox = widget::checkbox("", item.status == Status::Completed)
-                    .on_toggle(move |value| Message::Complete(id, value));
-    
-                let task_item_text = widget::text::title1(
-                    item.title.clone(),
-                );
-    
-                let row = widget::row::with_capacity(4)
-                    .align_y(Alignment::Center)
-                    .spacing(spacing.space_xxs)
-                    .padding([spacing.space_xxxs, spacing.space_xxs])
-                    .push(item_checkbox)
-                    .push(task_item_text);
-    
-                items = items.add(row);
-            }
-    
-            widget::column::with_capacity(2)
-                .spacing(spacing.space_xxs)
-                .push(self.list_header())
-                .push(items.apply(widget::scrollable))
-                .apply(widget::container)
-                .height(Length::Shrink)
-                .height(Length::Fill)
-                .into()
+        for (id, item) in &self.tasks {
+            let item_checkbox = widget::checkbox("", item.status == Status::Completed)
+                .on_toggle(move |value| Message::Complete(id, value));
 
+            let task_item_text = widget::text::title1(item.title.clone());
+
+            let row = widget::row::with_capacity(4)
+                .align_y(Alignment::Center)
+                .spacing(spacing.space_xxs)
+                .padding([spacing.space_xxxs, spacing.space_xxs])
+                .push(item_checkbox)
+                .push(task_item_text);
+
+            items = items.add(row);
+        }
+
+        widget::column::with_capacity(2)
+            .spacing(spacing.space_xxs)
+            .push(self.list_header())
+            .push(items.apply(widget::scrollable))
+            .apply(widget::container)
+            .height(Length::Shrink)
+            .height(Length::Fill)
+            .into()
     }
 
     pub fn empty<'a>(&'a self) -> Element<'a, Message> {

@@ -1,11 +1,11 @@
 use crate::app::icon_cache::get_icon;
 use crate::app::Flags;
 use crate::app::Message;
+use crate::context::ContextPage;
 use crate::fl;
 use cosmic::widget::menu::action::MenuAction;
 use cosmic::widget::{self, nav_bar};
 use serde::{Deserialize, Serialize};
-use crate::context::ContextPage;
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub enum NavPage {
@@ -59,4 +59,3 @@ pub fn get_nav_model(flags: &Flags) -> nav_bar::Model {
     }
     nav_model
 }
-
