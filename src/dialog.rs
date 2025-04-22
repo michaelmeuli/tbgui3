@@ -1,15 +1,6 @@
 use crate::app::types::AppError;
-use cosmic::{
-    iced::{
-        alignment::{Horizontal, Vertical},
-        Length,
-    },
-    widget::{self, calendar::CalendarModel, segmented_button},
-    Element,
-};
-
-use crate::{actions::ApplicationAction, app::Message, fl};
-
+use crate::{app::Message, fl};
+use cosmic::widget;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum DialogPage {
@@ -17,8 +8,8 @@ pub enum DialogPage {
 }
 
 impl DialogPage {
-    pub fn view(&self, text_input_id: &widget::Id) -> widget::Dialog<Message> {
-        let spacing = cosmic::theme::active().cosmic().spacing;
+    pub fn view(&self, _text_input_id: &widget::Id) -> widget::Dialog<Message> {
+        let _spacing = cosmic::theme::active().cosmic().spacing;
 
         match self {
             DialogPage::Info(error) => {

@@ -2,6 +2,7 @@ use crate::actions::Action;
 use crate::actions::ApplicationAction;
 use crate::content::{self, Content};
 use crate::context::ContextPage;
+use crate::dialog::DialogPage;
 use crate::fl;
 use crate::model::Sample;
 use crate::views::nav::{get_nav_model, NavPage};
@@ -19,7 +20,6 @@ use futures_util::SinkExt;
 use ssh::create_client;
 use std::collections::{HashMap, VecDeque};
 use types::AppError;
-use crate::dialog::DialogPage;
 
 const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
 
