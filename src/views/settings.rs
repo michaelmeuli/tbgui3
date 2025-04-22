@@ -1,10 +1,10 @@
 use crate::app::{Message, Tbgui};
 use cosmic::widget;
 use cosmic::Element;
-
 use cosmic::iced::alignment::{Horizontal, Vertical};
 use cosmic::iced::Length;
 use cosmic::prelude::*;
+
 
 impl Tbgui
 where
@@ -19,4 +19,6 @@ where
             .align_y(Vertical::Center)
             .into()
     }
+
+
 }

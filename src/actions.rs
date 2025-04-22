@@ -11,6 +11,7 @@ use cosmic::{
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Action {
     About,
+    Settings,
     WindowClose,
     WindowNew,
 }
@@ -43,6 +44,9 @@ impl MenuAction for Action {
         match self {
             Action::About => {
                 Message::Application(ApplicationAction::ToggleContextPage(ContextPage::About))
+            }
+            Action::Settings => {
+                Message::Application(ApplicationAction::ToggleContextPage(ContextPage::Settings))
             }
             Action::WindowClose => Message::Application(ApplicationAction::WindowClose),
             Action::WindowNew => Message::Application(ApplicationAction::WindowNew),

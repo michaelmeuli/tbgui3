@@ -33,3 +33,33 @@ no-tasks = No tasks
 no-tasks-suggestion = Try adding a task with the text field below
 no-list-selected = No list selected
 no-list-suggestion = Create or select a new list to get started
+
+
+### Appearance
+appearance = Appearance
+theme = Theme
+match-desktop = Match desktop
+dark = Dark
+light = Light
+
+# Menu
+
+## File
+file = File
+new-window = New window
+new-list = New list
+quit = Quit
+
+## Edit
+edit = Edit
+rename = Rename
+delete = Delete
+
+## View
+view = View
+menu-settings = Settings...
+menu-about = About Tasks...
+
+## About
+repository = Repository
+support = Support

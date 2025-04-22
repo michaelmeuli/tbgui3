@@ -40,6 +40,7 @@ pub struct Tbgui {
     content: Content,
     key_binds: HashMap<KeyBind, Action>,
     config: TbguiConfig,
+    app_themes: Vec<String>,
     config_handler: Option<cosmic_config::Config>,
     dialog_pages: VecDeque<DialogPage>,
     dialog_text_input: widget::Id,
@@ -68,6 +69,35 @@ pub enum Message {
 pub struct Flags {
     pub config_handler: Option<cosmic_config::Config>,
     pub config: TbguiConfig,
+}
+
+impl Tbgui {
+    fn settings(&self) -> Element<Message> {
+        widget::scrollable(widget::settings::section().title(fl!("appearance")).add(
+            widget::settings::item::item(
+                fl!("theme"),
+                widget::dropdown(
+                    &self.app_themes,
+                    Some(self.config.app_theme.into()),
+                    |theme| Message::Application(ApplicationAction::AppTheme(theme)),
+                ),
+            ),
+        ))
+        .into()
+    }
+
+    // fn create_nav_item(&mut self, list: &List) -> EntityMut<SingleSelect> {
+    //     self.nav_model
+    //         .insert()
+    //         .text(format!(
+    //             "{} {}",
+    //             list.icon
+    //                 .clone()
+    //                 .unwrap_or(emojis::get_by_shortcode("pencil").unwrap().to_string()),
+    //             list.name.clone()
+    //         ))
+    //         .data(list.clone())
+    // }
 }
 
 impl cosmic::Application for Tbgui {
@@ -110,6 +140,7 @@ impl cosmic::Application for Tbgui {
                     }
                 })
                 .unwrap_or_default(),
+            app_themes: vec![fl!("match-desktop"), fl!("dark"), fl!("light")],
             dialog_pages: VecDeque::new(),
             dialog_text_input: widget::Id::unique(),
         };
@@ -141,6 +172,11 @@ impl cosmic::Application for Tbgui {
             ContextPage::About => context_drawer::context_drawer(
                 self.about(),
                 Message::Application(ApplicationAction::ToggleContextPage(ContextPage::About)),
+            )
+            .title(self.context_page.title()),
+            ContextPage::Settings => context_drawer::context_drawer(
+                self.settings(),
+                Message::Application(ApplicationAction::ToggleContextDrawer),
             )
             .title(self.context_page.title()),
         })

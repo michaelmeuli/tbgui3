@@ -42,6 +42,9 @@ impl IconCache {
         bundle!("scanner", 16);
         bundle!("settings", 16);
 
+        bundle!("settings-symbolic", 14);
+        bundle!("info-outline-symbolic", 14);
+
         Self { cache }
     }
 

@@ -91,6 +91,26 @@ pub enum AppTheme {
     System,
 }
 
+impl From<usize> for AppTheme {
+    fn from(value: usize) -> Self {
+        match value {
+            1 => AppTheme::Dark,
+            2 => AppTheme::Light,
+            _ => AppTheme::System,
+        }
+    }
+}
+
+impl From<AppTheme> for usize {
+    fn from(value: AppTheme) -> Self {
+        match value {
+            AppTheme::System => 0,
+            AppTheme::Dark => 1,
+            AppTheme::Light => 2,
+        }
+    }
+}
+
 impl AppTheme {
     pub fn theme(&self) -> theme::Theme {
         match self {
