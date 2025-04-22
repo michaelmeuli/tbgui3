@@ -24,7 +24,7 @@ use types::AppError;
 const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
 
 pub mod config;
-pub mod icon_cache;
+pub mod icons;
 pub mod localize;
 pub mod menu;
 pub mod settings;

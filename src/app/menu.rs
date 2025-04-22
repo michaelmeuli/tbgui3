@@ -4,9 +4,11 @@ use cosmic::{
     widget::menu::{items, key_bind::KeyBind, root, Item, ItemHeight, ItemWidth, MenuBar, Tree},
     Element,
 };
-use crate::app::{Action, Message};
-use crate::fl;
-use crate::app::icon_cache::get_handle;
+use crate::{
+    app::icons,
+    app::{Action, Message},
+    fl,
+};
 
 
 pub fn menu_bar<'a>(key_binds: &HashMap<KeyBind, Action>) -> Element<'a, Message> {
@@ -19,13 +21,13 @@ pub fn menu_bar<'a>(key_binds: &HashMap<KeyBind, Action>) -> Element<'a, Message
                 vec![
                     Item::Button(
                         fl!("menu-settings"),
-                        Some(get_handle("settings-symbolic", 14)),
+                        Some(icons::get_handle("settings-symbolic", 14)),
                         Action::Settings,
                     ),
                     Item::Divider,
                     Item::Button(
                         fl!("menu-about"),
-                        Some(get_handle("info-outline-symbolic", 14)),
+                        Some(icons::get_handle("info-outline-symbolic", 14)),
                         Action::About,
                     ),
                 ],

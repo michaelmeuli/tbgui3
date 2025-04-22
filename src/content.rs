@@ -1,6 +1,6 @@
-use crate::app::icon_cache::get_icon;
+use crate::app::icons::get_icon;
 use crate::model::{self, status::Status, List, Sample};
-use crate::{app::icon_cache, fl};
+use crate::{app::icons, fl};
 use cosmic::{
     iced::{
         alignment::{Horizontal, Vertical},
@@ -141,7 +141,7 @@ impl Content {
         if self.tasks.is_empty() {
             return widget::container(
                 widget::column::with_children(vec![
-                    icon_cache::get_icon("applications-office-symbolic", 56).into(),
+                    icons::get_icon("applications-office-symbolic", 56).into(),
                     widget::text::title1(fl!("no-list-selected")).into(),
                     widget::text(fl!("no-list-suggestion")).into(),
                 ])

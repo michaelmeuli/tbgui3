@@ -1,4 +1,4 @@
-use crate::app::icon_cache::get_icon;
+use crate::app::icons::get_icon;
 use crate::app::Flags;
 use crate::app::Message;
 use crate::context::ContextPage;
