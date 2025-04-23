@@ -343,6 +343,7 @@ impl cosmic::Application for Tbgui {
                             tracing::error!("{err}")
                         }
                     }
+                    commands.push(self.save_theme());
                 }
                 ApplicationAction::Key(modifiers, key) => {
                     for (key_bind, action) in &self.key_binds {
@@ -379,7 +380,10 @@ impl cosmic::Application for Tbgui {
     }
 }
 
-impl Tbgui {
+impl Tbgui
+where
+    Self: cosmic::Application,
+{
     pub fn update_title(&mut self) -> Task<cosmic::Action<Message>> {
         let mut window_title = fl!("app-title");
 
@@ -395,19 +399,17 @@ impl Tbgui {
         }
     }
 
-    fn save_config(&mut self) -> Task<Message> {
+    fn save_config(&mut self) -> Task<cosmic::Action<Message>> {
         if let Some(ref config_handler) = self.config_handler {
             if let Err(err) = self.config.write_entry(config_handler) {
                 log::error!("failed to save config: {}", err);
             }
         }
-
         Task::none()
     }
 
-    fn save_theme(&self) -> Task<Message> {
-        Task::none()
-        //cosmic::app::command::set_theme(self.config.app_theme.theme())
-        //TODO: use the above command to set the theme in the app
+    fn save_theme(&self) -> Task<cosmic::Action<Message>> {
+        cosmic::command::set_theme(self.config.app_theme.theme())
     }
+
 }
