@@ -69,7 +69,6 @@ pub enum Message {
 
     RunTbProfiler,
     OpenRepositoryUrl,
-    SubscriptionChannel,
     UpdateConfig(TbguiConfig),
     LaunchUrl(String),
     Error(AppError),
@@ -300,10 +299,6 @@ impl cosmic::Application for Tbgui {
             }
             Message::OpenRepositoryUrl => {
                 _ = open::that_detached(REPOSITORY);
-            }
-
-            Message::SubscriptionChannel => {
-                // For example purposes only.
             }
 
             Message::UpdateConfig(config) => {
