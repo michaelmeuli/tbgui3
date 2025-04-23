@@ -23,7 +23,6 @@ pub enum ApplicationAction {
     Key(Modifiers, Key),
     Modifiers(Modifiers),
     AppTheme(usize),
-    SystemThemeModeChange,
     Focus(widget::Id),
     ToggleContextDrawer,
     ToggleContextPage(ContextPage),

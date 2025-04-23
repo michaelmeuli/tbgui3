@@ -6,27 +6,27 @@ use std::{
 
 use crate::actions::Action;
 use crate::actions::ApplicationAction;
+use crate::app::key_bind::key_binds;
 use crate::content::{self, Content};
 use crate::context::ContextPage;
 use crate::dialog::DialogPage;
 use crate::fl;
 use crate::model::Sample;
 use crate::views::nav::{get_nav_model, NavPage};
-use crate::app::key_bind::key_binds;
 use async_ssh2_tokio::client::Client;
 use config::TbguiConfig;
 use cosmic::app::context_drawer;
 use cosmic::app::Core;
 use cosmic::cosmic_config::{self, CosmicConfigEntry};
 use cosmic::iced::alignment::{Horizontal, Vertical};
+use cosmic::iced::keyboard::Event as KeyEvent;
+use cosmic::iced::keyboard::Modifiers;
+use cosmic::iced::Event;
 use cosmic::iced::{Length, Subscription};
 use cosmic::prelude::*;
 use cosmic::widget::menu::key_bind::KeyBind;
-use cosmic::widget::{self, nav_bar};
-use cosmic::iced::keyboard::Modifiers;
 use cosmic::widget::menu::Action as _;
-use cosmic::iced::Event;
-use cosmic::iced::keyboard::Event as KeyEvent;
+use cosmic::widget::{self, nav_bar};
 use ssh::create_client;
 use types::AppError;
 
@@ -34,13 +34,13 @@ const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
 
 pub mod config;
 pub mod icons;
+pub mod key_bind;
 pub mod localize;
 pub mod menu;
 pub mod settings;
 pub mod ssh;
 pub mod types;
 pub mod utils;
-pub mod key_bind;
 
 pub struct Tbgui {
     core: Core,
@@ -115,7 +115,6 @@ impl cosmic::Application for Tbgui {
     type Executor = cosmic::executor::Default;
     type Flags = Flags;
     type Message = Message;
-    /// Unique identifier in RDNN (reverse domain name notation) format.
     const APP_ID: &'static str = "ch.uzh.michael.tbgui";
 
     fn core(&self) -> &cosmic::Core {
@@ -128,8 +127,6 @@ impl cosmic::Application for Tbgui {
 
     fn init(core: cosmic::Core, flags: Self::Flags) -> (Self, Task<cosmic::Action<Self::Message>>) {
         let mut commands = vec![];
-
-        // Construct the app model with the runtime's core.
         let mut app = Tbgui {
             core,
             context_page: ContextPage::About,
@@ -145,7 +142,6 @@ impl cosmic::Application for Tbgui {
             dialog_text_input: widget::Id::unique(),
         };
 
-        println!("CreateClient");
         commands.push(Task::done(cosmic::Action::App(Message::CreateClient)));
 
         app.core.nav_bar_set_toggled(false);
@@ -206,8 +202,6 @@ impl cosmic::Application for Tbgui {
     }
 
     fn subscription(&self) -> Subscription<Self::Message> {
-        struct MySubscription;
-
         Subscription::batch(vec![
             cosmic::iced::event::listen_with(|event, _status, _window_id| match event {
                 Event::Keyboard(KeyEvent::KeyPressed { key, modifiers, .. }) => {
@@ -218,23 +212,17 @@ impl cosmic::Application for Tbgui {
                 ),
                 _ => None,
             }),
-            // Watch for application configuration changes.
             self.core()
                 .watch_config::<TbguiConfig>(Self::APP_ID)
                 .map(|update| {
-                    // for why in update.errors {
-                    //     tracing::error!(?why, "app config error");
-                    // }
-
+                    for why in update.errors {
+                        tracing::error!(?why, "app config error");
+                    }
                     Message::UpdateConfig(update.config)
                 }),
         ])
     }
 
-    /// Handles messages emitted by the application and its widgets.
-    ///
-    /// Tasks may be returned for asynchronous execution of code in the background
-    /// on the application's async runtime.
     fn update(&mut self, message: Self::Message) -> Task<cosmic::Action<Self::Message>> {
         let mut commands = vec![];
         match message {
@@ -361,7 +349,6 @@ impl cosmic::Application for Tbgui {
                         }
                     }
                 }
-                ApplicationAction::SystemThemeModeChange => {}  //TODO: implement this
                 ApplicationAction::Key(modifiers, key) => {
                     for (key_bind, action) in &self.key_binds {
                         if key_bind.matches(modifiers, &key) {
