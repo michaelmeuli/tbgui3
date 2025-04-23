@@ -1,33 +1,33 @@
+use crate::{
+    actions::{Action, ApplicationAction},
+    app::key_bind::key_binds,
+    content::{self, Content},
+    context::ContextPage,
+    dialog::DialogPage,
+    fl,
+    model::Sample,
+    views::nav::{get_nav_model, NavPage},
+};
+use async_ssh2_tokio::client::Client;
+use config::TbguiConfig;
+use cosmic::app::{context_drawer, Core};
+use cosmic::cosmic_config::{self, CosmicConfigEntry};
+use cosmic::iced::{
+    alignment::{Horizontal, Vertical},
+    keyboard::{Event as KeyEvent, Modifiers},
+    Event, Length, Subscription,
+};
+use cosmic::prelude::*;
+use cosmic::widget::{
+    self,
+    menu::{key_bind::KeyBind, Action as _},
+    nav_bar,
+};
+use ssh::create_client;
 use std::{
-    any::TypeId,
     collections::{HashMap, VecDeque},
     env, process,
 };
-
-use crate::actions::Action;
-use crate::actions::ApplicationAction;
-use crate::app::key_bind::key_binds;
-use crate::content::{self, Content};
-use crate::context::ContextPage;
-use crate::dialog::DialogPage;
-use crate::fl;
-use crate::model::Sample;
-use crate::views::nav::{get_nav_model, NavPage};
-use async_ssh2_tokio::client::Client;
-use config::TbguiConfig;
-use cosmic::app::context_drawer;
-use cosmic::app::Core;
-use cosmic::cosmic_config::{self, CosmicConfigEntry};
-use cosmic::iced::alignment::{Horizontal, Vertical};
-use cosmic::iced::keyboard::Event as KeyEvent;
-use cosmic::iced::keyboard::Modifiers;
-use cosmic::iced::Event;
-use cosmic::iced::{Length, Subscription};
-use cosmic::prelude::*;
-use cosmic::widget::menu::key_bind::KeyBind;
-use cosmic::widget::menu::Action as _;
-use cosmic::widget::{self, nav_bar};
-use ssh::create_client;
 use types::AppError;
 
 const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
@@ -63,11 +63,8 @@ pub enum Message {
     CreatedClient(Result<Client, AppError>),
     LoadRemoteState,
     LoadedRemoteState(Vec<Sample>),
-
     Content(content::Message),
     Application(ApplicationAction),
-
-    RunTbProfiler,
     OpenRepositoryUrl,
     UpdateConfig(TbguiConfig),
     LaunchUrl(String),
@@ -226,13 +223,9 @@ impl cosmic::Application for Tbgui {
         let mut commands = vec![];
         match message {
             Message::CreateClient => {
-                println!("CreateClient2");
                 let config = self.config.clone();
                 let command = Task::perform(
-                    async move {
-                        println!("CreateClient3");
-                        create_client(&config).await
-                    },
+                    async move { create_client(&config).await },
                     |client| match client {
                         Ok(client) => cosmic::Action::App(Message::CreatedClient(Ok(client))),
                         Err(err) => cosmic::Action::App(Message::CreatedClient(Err(
@@ -243,7 +236,6 @@ impl cosmic::Application for Tbgui {
                 commands.push(command);
             }
             Message::CreatedClient(result) => {
-                println!("Created client");
                 match result {
                     Ok(client) => {
                         self.client = Some(client);
@@ -280,8 +272,6 @@ impl cosmic::Application for Tbgui {
             }
             Message::LoadedRemoteState(result) => {
                 let items = result.clone();
-                //commands.push(Task::done(cosmic::Action::App(Message::Content(content::Message::SetItems(Vec::new())))));
-                //commands.push(Task::done(cosmic::Action::App(Message::Content(content::Message::SetItems(items)))));
                 let message = Message::Content(content::Message::SetItems(items));
                 return self.update(message);
             }
@@ -293,9 +283,6 @@ impl cosmic::Application for Tbgui {
                         content::TaskMessage::Update(task) => {}
                     }
                 }
-            }
-            Message::RunTbProfiler => {
-                //TODO: fetch raw sequences first
             }
             Message::OpenRepositoryUrl => {
                 _ = open::that_detached(REPOSITORY);
@@ -344,6 +331,7 @@ impl cosmic::Application for Tbgui {
                         }
                     }
                     commands.push(self.save_theme());
+                    commands.push(self.save_config());
                 }
                 ApplicationAction::Key(modifiers, key) => {
                     for (key_bind, action) in &self.key_binds {
@@ -411,5 +399,4 @@ where
     fn save_theme(&self) -> Task<cosmic::Action<Message>> {
         cosmic::command::set_theme(self.config.app_theme.theme())
     }
-
 }
